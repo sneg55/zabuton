@@ -133,6 +133,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .between { justify-content: space-between; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.split { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.split-open { grid-template-columns: minmax(280px, 2fr) minmax(320px, 3fr); }
 .empty { padding: 40px 20px; text-align: center; color: var(--ink-2); }
 .empty .display-md { margin-bottom: 6px; color: var(--ink); }
 .error { color: var(--brick); }
@@ -226,6 +228,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .rail nav { display: flex; flex-wrap: wrap; }
   .page { padding: 20px 16px 48px; }
   .diff { grid-template-columns: 1fr; }
+  .split-open { grid-template-columns: 1fr; }
   .urlform { flex-direction: column; }
   .topnav { gap: 12px; }
 }

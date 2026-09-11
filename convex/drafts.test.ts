@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
+import { insertDrafts } from "./drafts";
 import { normalizeTermEnd } from "./lib/termDates";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -167,5 +168,30 @@ describe("drafts.dismiss", () => {
     await clerk.mutation(api.drafts.dismiss, { draftId: draft._id });
     expect(await t.query(api.drafts.list, { cityId })).toHaveLength(0);
     expect(await t.query(api.drafts.list, { cityId, status: "dismissed" })).toHaveLength(1);
+  });
+});
+
+describe("insertDrafts against tracked bodies", () => {
+  it("skips drafts whose name matches a body the city already tracks", async () => {
+    const t = convexTest(schema, modules);
+    const { cityId, crawlRunId } = await t.run(async (ctx) => {
+      const cityId = await ctx.db.insert("cities", { name: "Testville", domain: "testville.gov", slug: "testville", websiteUrl: "https://testville.gov", status: "confirmed" });
+      await ctx.db.insert("bodies", { cityId, name: "Planning & Zoning Commission", sourceUrl: "https://testville.gov/pz", confirmed: true });
+      const crawlRunId = await ctx.db.insert("crawlRuns", { cityId, purpose: "bootstrap", source: "firecrawl", status: "extracting", startedAt: 1, pageCount: 0, documentCount: 0, draftCount: 0, log: [] });
+      return { cityId, crawlRunId };
+    });
+    const result = await t.run(async (ctx) =>
+      insertDrafts(ctx, {
+        cityId,
+        crawlRunId,
+        drafts: [
+          { name: "Planning and Zoning Commission", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://testville.gov/pz" },
+          { name: "Library Board", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://testville.gov/lib" },
+        ],
+      }),
+    );
+    expect(result).toEqual({ draftCount: 1, mergedCount: 0, trackedCount: 1 });
+    const run = await t.run(async (ctx) => ctx.db.get(crawlRunId));
+    expect(run?.log.at(-1)?.message).toBe("1 bodies already tracked for this city, skipped");
   });
 });

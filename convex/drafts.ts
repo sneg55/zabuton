@@ -30,9 +30,15 @@ export async function insertDrafts(
     documentId?: Id<"documents">;
     drafts: DraftInput[];
   },
-): Promise<{ draftCount: number; mergedCount: number }> {
+): Promise<{ draftCount: number; mergedCount: number; trackedCount: number }> {
   let inserted = 0;
   let merged = 0;
+  let tracked = 0;
+  const bodies = await ctx.db
+    .query("bodies")
+    .withIndex("by_city", (q) => q.eq("cityId", cityId))
+    .collect();
+  const trackedNames = new Set(bodies.map((body) => canonicalName(body.name)));
   const rows = await ctx.db
     .query("drafts")
     .withIndex("by_run", (q) => q.eq("crawlRunId", crawlRunId))
@@ -45,6 +51,10 @@ export async function insertDrafts(
   for (const draft of drafts) {
     if (isGenericBodyName(draft.name)) continue;
     const key = canonicalName(draft.name);
+    if (trackedNames.has(key)) {
+      tracked += 1;
+      continue;
+    }
     const existing = pendingByName.get(key);
     if (existing) {
       const combined = mergeDrafts(existing.draft, draft);
@@ -67,7 +77,11 @@ export async function insertDrafts(
     pendingByName.set(key, { id, draft, documentId });
     inserted += 1;
   }
-  return { draftCount: inserted, mergedCount: merged };
+  if (tracked > 0) {
+    const run = await ctx.db.get(crawlRunId);
+    if (run) await ctx.db.patch(crawlRunId, { log: [...run.log, { at: Date.now(), message: `${tracked} bodies already tracked for this city, skipped` }] });
+  }
+  return { draftCount: inserted, mergedCount: merged, trackedCount: tracked };
 }
 
 export const recordExtraction = internalMutation({

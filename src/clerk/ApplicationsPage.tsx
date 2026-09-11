@@ -36,7 +36,7 @@ export function ApplicationsPage() {
       <PageHead title="Applications" intro="Residents apply from the public openings page. Each application keeps one email thread, so every reply lands here." />
       {list.length === 0 && <Empty title="No applications yet">Share the public openings page. New applications appear here the moment they are sent.</Empty>}
       {list.length > 0 && (
-        <div className="grid-2" style={{ gridTemplateColumns: open ? "minmax(320px, 2fr) minmax(360px, 3fr)" : "1fr", alignItems: "start" }}>
+        <div className={`split${open ? " split-open" : ""}`}>
           <div className="table-wrap">
             <table className="table">
               <thead><tr><th>Applicant</th><th>Body</th><th>State</th><th>Updated</th></tr></thead>

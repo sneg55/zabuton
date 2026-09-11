@@ -36,10 +36,10 @@ export function SettingsPage() {
           <label className="field"><span>Display name</span><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></label>
           <label className="field"><span>Notice window, days before a term ends</span><input className="input" type="number" min={7} max={365} value={days} onChange={(e) => setDays(e.target.value)} /></label>
           <div className="row between">
-            <span className="small muted">Status: {city.status}. {city.status === "draft" ? "Confirm at least one body to publish the roster." : "Roster is public."}</span>
+            <span className="small muted">{city.status === "draft" ? "Still in setup: confirmed bodies already show on the public roster." : "Roster is published."}</span>
             <button className="btn" type="submit">Save</button>
           </div>
-          {city.status === "draft" && <button type="button" className="btn btn-secondary" onClick={() => run(update({ cityId: city._id, status: "confirmed" }), "Roster published.")}>Publish the roster</button>}
+          {city.status === "draft" && <button type="button" className="btn btn-secondary" onClick={() => run(update({ cityId: city._id, status: "confirmed" }), "Marked as set up. Daily drift checks now cover this city.")}>Finish setup</button>}
         </form>
         <div className="card card-pad stack">
           <h2 className="display display-md">City inbox</h2>

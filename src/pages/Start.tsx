@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
@@ -25,6 +25,7 @@ const KIND_LABEL: Record<Doc<"documents">["kind"], string> = {
 
 export function Start() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const url = params.get("url") ?? "";
   const start = useMutation(api.bootstrap.start);
   const [runId, setRunId] = useState<Id<"crawlRuns"> | null>((params.get("run") as Id<"crawlRuns"> | null) ?? null);
@@ -34,9 +35,12 @@ export function Start() {
     if (!url || started.current || runId) return;
     started.current = true;
     start({ url })
-      .then((r) => setRunId(r.crawlRunId))
+      .then((r) => {
+        setRunId(r.crawlRunId);
+        navigate(`/start?run=${r.crawlRunId}`, { replace: true });
+      })
       .catch((e: unknown) => setError(errorText(e)));
-  }, [url, start, runId]);
+  }, [url, start, runId, navigate]);
   const status = useQuery(api.bootstrap.status, runId ? { crawlRunId: runId } : "skip");
   return (
     <SiteFrame>
