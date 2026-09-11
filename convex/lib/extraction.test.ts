@@ -8,6 +8,7 @@ import {
   ROSTER_SCHEMA,
   classificationOf,
   draftsFor,
+  looksLikePdf,
   parseResponsesOutput,
   rosterToDrafts,
   rulesToDrafts,
@@ -133,6 +134,24 @@ describe("draftsFor", () => {
     expect(draftsFor("vacancy_notice", smVacancies, SM_URL)).toHaveLength(4);
     expect(draftsFor("rules_page", dublinRules, RULES_URL).length).toBeGreaterThan(0);
     expect(draftsFor("other", dublinRoster, ROSTER_URL)).toEqual([]);
+  });
+});
+
+describe("looksLikePdf", () => {
+  const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]);
+  const htmlBytes = new TextEncoder().encode("<html>");
+
+  it("takes the content type when the server states it", () => {
+    expect(looksLikePdf("https://x.gov/doc", "application/pdf", htmlBytes)).toBe(true);
+  });
+  it("takes a .pdf path when the server sends octet-stream", () => {
+    expect(looksLikePdf("https://x.gov/DocumentCenter/roster.pdf?v=2", "application/octet-stream", htmlBytes)).toBe(true);
+  });
+  it("takes the magic bytes when neither says so", () => {
+    expect(looksLikePdf("https://x.gov/DocumentCenter/View/36214", "application/octet-stream", pdfBytes)).toBe(true);
+  });
+  it("leaves an HTML page as text", () => {
+    expect(looksLikePdf("https://x.gov/74", "text/html", htmlBytes)).toBe(false);
   });
 });
 

@@ -17,6 +17,7 @@ import {
   RESPONSES_URL,
   classificationOf,
   draftsFor,
+  looksLikePdf,
   parseResponsesOutput,
   schemaFor,
   toBase64,
@@ -42,8 +43,9 @@ export function contentFor(payload: DocumentPayload): ContentPart[] {
   if (payload.bytes.byteLength > MAX_DOCUMENT_BYTES) {
     throw new Error(`Document is ${Math.round(payload.bytes.byteLength / 1024 / 1024)} MB, over the extraction limit`);
   }
-  if (payload.contentType.includes("pdf")) {
-    const data = toBase64(new Uint8Array(payload.bytes));
+  const bytes = new Uint8Array(payload.bytes);
+  if (looksLikePdf(payload.url, payload.contentType, bytes)) {
+    const data = toBase64(bytes);
     return [
       { type: "input_file", filename: "doc.pdf", file_data: `data:application/pdf;base64,${data}` },
       { type: "input_text", text: `Source URL: ${payload.url}` },

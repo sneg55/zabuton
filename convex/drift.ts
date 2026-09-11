@@ -12,6 +12,7 @@ import {
 } from "./_generated/server";
 import { publishedRosterFor } from "./extract";
 import { canonicalName } from "./lib/draftTypes";
+import { legistarRefFromUrl } from "./legistar";
 import { diffRoster, type TrackedMember } from "./lib/driftDiff";
 import { normalizeTermEnd } from "./lib/termDates";
 import { driftStatusValidator } from "./schema";
@@ -124,8 +125,9 @@ export const refreshSource = internalAction({
       const published = await publishedRosterFor(ctx, sourceUrl);
       let opened = 0;
       for (const body of bodies) {
-        const rows = published.get(canonicalName(body.name)) ?? (published.size === 1 ? [...published.values()][0] : null);
-        if (rows === null) continue;
+        const sole = legistarRefFromUrl(sourceUrl) !== null && published.size === 1 ? [...published.values()][0] : null;
+        const rows = published.get(canonicalName(body.name)) ?? sole;
+        if (rows === undefined || rows === null) continue;
         const result = await ctx.runMutation(internal.drift.recordDiff, {
           cityId,
           crawlRunId,
@@ -229,9 +231,9 @@ export const list = query({
         const member = term ? await ctx.db.get(term.memberId) : null;
         memberName = member?.name ?? null;
       }
-      rows.push({ flag, bodyName: body?.name ?? null, memberName });
+      rows.push({ ...flag, bodyName: body?.name ?? null, memberName });
     }
-    return rows.sort((a, b) => b.flag._creationTime - a.flag._creationTime);
+    return rows.sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 

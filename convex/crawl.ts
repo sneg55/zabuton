@@ -24,7 +24,7 @@ import {
 } from "./legistar";
 import { crawlSourceValidator, crawlStatusValidator } from "./schema";
 
-export const LEGISTAR_BODY_CAP = 25;
+export const LEGISTAR_BODY_CAP = 60;
 
 export const setRunStatus = internalMutation({
   args: {
@@ -167,11 +167,13 @@ export const discover = internalAction({
   handler: async (ctx, { cityId, crawlRunId, websiteUrl, domain }): Promise<{ source: "legistar" | "firecrawl"; candidates: number }> => {
     const legistar = await probeLegistarClient(legistarClientGuesses(domain));
     if (legistar) {
-      const bodies = selectBodies(legistar.bodies).slice(0, LEGISTAR_BODY_CAP);
+      const matched = selectBodies(legistar.bodies);
+      const bodies = matched.slice(0, LEGISTAR_BODY_CAP);
+      const capped = matched.length > bodies.length ? `, reading the first ${bodies.length}` : "";
       await ctx.runMutation(internal.crawl.setRunStatus, {
         crawlRunId,
         source: "legistar",
-        message: `Legistar client ${legistar.client}: ${bodies.length} active bodies`,
+        message: `Legistar client ${legistar.client}: ${matched.length} active bodies${capped}`,
       });
       const sinceIso = oneYearAgoIso(Date.now());
       const drafts: DraftInput[] = [];

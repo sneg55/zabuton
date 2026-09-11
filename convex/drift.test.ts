@@ -100,13 +100,13 @@ describe("drift.recordDiff", () => {
       ]),
     });
     const rows = await t.query(api.drift.list, { cityId });
-    const byField = Object.fromEntries(rows.map((row) => [row.flag.field, row]));
+    const byField = Object.fromEntries(rows.map((row) => [row.field, row]));
     expect(Object.keys(byField).sort()).toEqual(["member_added", "member_missing", "term_end"]);
-    expect(byField.term_end.flag).toMatchObject({ published: "12/28", tracked: "12/26", sourceUrl: SOURCE });
+    expect(byField.term_end).toMatchObject({ published: "12/28", tracked: "12/26", sourceUrl: SOURCE });
     expect(byField.term_end.bodyName).toBe("Planning Commission");
     expect(byField.term_end.memberName).toBe("Ada Lovelace");
-    expect(byField.member_added.flag.published).toContain("Cy Young");
-    expect(byField.member_missing.flag.tracked).toContain("Bo Diddley");
+    expect(byField.member_added.published).toContain("Cy Young");
+    expect(byField.member_missing.tracked).toContain("Bo Diddley");
     expect(byField.member_missing.memberName).toBe("Bo Diddley");
   });
 
@@ -149,7 +149,7 @@ describe("drift.recordDiff", () => {
       sourceUrl: SOURCE,
       published: published([...base, ["Cy Young", "12/30"], ["Dot Matrix", "12/30"]]),
     });
-    const added = (await t.query(api.drift.list, { cityId })).filter((row) => row.flag.field === "member_added");
+    const added = (await t.query(api.drift.list, { cityId })).filter((row) => row.field === "member_added");
     expect(added).toHaveLength(2);
   });
 
@@ -173,7 +173,7 @@ describe("drift.recordDiff", () => {
     });
     const rows = await t.query(api.drift.list, { cityId });
     expect(rows).toHaveLength(1);
-    expect(rows[0].flag).toMatchObject({ field: "term_end", published: "12/26", tracked: "2029-12-31" });
+    expect(rows[0]).toMatchObject({ field: "term_end", published: "12/26", tracked: "2029-12-31" });
   });
 });
 
@@ -195,7 +195,7 @@ describe("drift.resolve", () => {
     const t = convexTest(schema, modules);
     const { cityId, bodyId, rows } = await flaggedCity(t);
     const clerk = await asClerk(t);
-    const flag = rows.find((row) => row.flag.field === "term_end")!.flag;
+    const flag = rows.find((row) => row.field === "term_end")!;
     await clerk.mutation(api.drift.resolve, { flagId: flag._id, action: "accept_published" });
     const board = await t.query(api.roster.board, { bodyId, now });
     expect(board?.seats[0].term?.rawEnd).toBe("12/28");
@@ -208,7 +208,7 @@ describe("drift.resolve", () => {
     const t = convexTest(schema, modules);
     const { bodyId, rows } = await flaggedCity(t);
     const clerk = await asClerk(t);
-    const flag = rows.find((row) => row.flag.field === "member_missing")!.flag;
+    const flag = rows.find((row) => row.field === "member_missing")!;
     await clerk.mutation(api.drift.resolve, { flagId: flag._id, action: "accept_published" });
     const board = await t.query(api.roster.board, { bodyId, now });
     expect(board?.seats[1].term).toBeNull();
@@ -219,7 +219,7 @@ describe("drift.resolve", () => {
     const t = convexTest(schema, modules);
     const { bodyId, rows } = await flaggedCity(t);
     const clerk = await asClerk(t);
-    const flag = rows.find((row) => row.flag.field === "term_end")!.flag;
+    const flag = rows.find((row) => row.field === "term_end")!;
     await clerk.mutation(api.drift.resolve, { flagId: flag._id, action: "keep_tracked" });
     const board = await t.query(api.roster.board, { bodyId, now });
     expect(board?.seats[0].term?.rawEnd).toBe("12/26");
@@ -230,7 +230,7 @@ describe("drift.resolve", () => {
     const t = convexTest(schema, modules);
     const { rows } = await flaggedCity(t);
     const clerk = await asClerk(t);
-    const flagId = rows[0].flag._id;
+    const flagId = rows[0]._id;
     await expect(t.mutation(api.drift.resolve, { flagId, action: "keep_tracked" })).rejects.toThrow(/Sign in/);
     await clerk.mutation(api.drift.resolve, { flagId, action: "keep_tracked" });
     await expect(clerk.mutation(api.drift.resolve, { flagId, action: "keep_tracked" })).rejects.toThrow(
