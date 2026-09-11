@@ -1,0 +1,74 @@
+[
+ {
+  "BodyId": 138,
+  "BodyName": "City Council",
+  "BodyTypeName": "Primary Legislative Body",
+  "BodyActiveFlag": 1,
+  "BodyNumberOfMembers": 11,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 153,
+  "BodyName": "City Planning Commission",
+  "BodyTypeName": "Planning Commission",
+  "BodyActiveFlag": 1,
+  "BodyNumberOfMembers": 9,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 154,
+  "BodyName": "Zoning Board of Appeals",
+  "BodyTypeName": "Zoning Board of Appeals",
+  "BodyActiveFlag": 1,
+  "BodyNumberOfMembers": 9,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 220,
+  "BodyName": "Energy Commission",
+  "BodyTypeName": "Energy Commission",
+  "BodyActiveFlag": 0,
+  "BodyNumberOfMembers": 11,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 225,
+  "BodyName": "Housing and Human Services Advisory Board",
+  "BodyTypeName": "Citizen Board or Commission",
+  "BodyActiveFlag": 0,
+  "BodyNumberOfMembers": 15,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 139,
+  "BodyName": "Budget Committee",
+  "BodyTypeName": "Council Committee",
+  "BodyActiveFlag": 0,
+  "BodyNumberOfMembers": 5,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 180,
+  "BodyName": "Canvassers, Board of",
+  "BodyTypeName": "Citizen Board or Commission",
+  "BodyActiveFlag": 0,
+  "BodyNumberOfMembers": 4,
+  "BodyMeetFlag": 0
+ },
+ {
+  "BodyId": 265,
+  "BodyName": "Washtenaw Area Transportation Study (W.A.T.S.) Liaison (Ann Arbor/Ypsilanti Area Transportation System)",
+  "BodyTypeName": "Council Committee",
+  "BodyActiveFlag": 1,
+  "BodyNumberOfMembers": 18,
+  "BodyMeetFlag": 1
+ },
+ {
+  "BodyId": 315,
+  "BodyName": "Washtenaw Metro Alliance",
+  "BodyTypeName": "Council Committee",
+  "BodyActiveFlag": 1,
+  "BodyNumberOfMembers": 2,
+  "BodyMeetFlag": 0
+ }
+]
