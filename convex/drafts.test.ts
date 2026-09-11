@@ -59,7 +59,7 @@ describe("recordExtraction", () => {
     const t = convexTest(schema, modules);
     const { cityId, crawlRunId } = await seedRun(t);
     const result = await t.mutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts: [rosterDraft()] });
-    expect(result).toEqual({ draftCount: 1, mergedCount: 0 });
+    expect(result).toEqual({ draftCount: 1, mergedCount: 0, trackedCount: 0 });
     const drafts = await t.query(api.drafts.list, { cityId });
     expect(drafts).toHaveLength(1);
     expect(drafts[0].members).toHaveLength(2);
@@ -85,7 +85,7 @@ describe("recordExtraction", () => {
         },
       ],
     });
-    expect(second).toEqual({ draftCount: 0, mergedCount: 1 });
+    expect(second).toEqual({ draftCount: 0, mergedCount: 1, trackedCount: 0 });
     const drafts = await t.query(api.drafts.list, { cityId });
     expect(drafts).toHaveLength(1);
     expect(drafts[0].termLength).toBe("four years");

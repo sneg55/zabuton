@@ -26,6 +26,7 @@ import { cityNameFromTitle, titleOfHtml } from "./lib/cityName";
 import { crawlSourceValidator, crawlStatusValidator } from "./schema";
 
 export const LEGISTAR_BODY_CAP = 60;
+export const LEGISTAR_COMPLETE_MIN = 5;
 
 export const setRunStatus = internalMutation({
   args: {
@@ -186,9 +187,11 @@ export const discover = internalAction({
     domain: v.string(),
   },
   handler: async (ctx, { cityId, crawlRunId, websiteUrl, domain }): Promise<{ source: "legistar" | "firecrawl"; candidates: number }> => {
+    let homepage = "";
     try {
       const home = await fetchWithBrowserUa(websiteUrl);
-      const name = cityNameFromTitle(titleOfHtml(new TextDecoder().decode(home.bytes)));
+      homepage = new TextDecoder().decode(home.bytes);
+      const name = cityNameFromTitle(titleOfHtml(homepage));
       if (name) await ctx.runMutation(internal.crawl.setCityName, { cityId, name });
     } catch {
       await ctx.runMutation(internal.crawl.setRunStatus, { crawlRunId, message: `${domain} did not answer a plain request; the site may block automated visitors` });
@@ -220,14 +223,17 @@ export const discover = internalAction({
       if (drafts.length > 0) {
         await ctx.runMutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts });
       }
+      const linked = homepage.toLowerCase().includes(`${legistar.client}.legistar.com`);
+      const complete = linked && drafts.length >= LEGISTAR_COMPLETE_MIN;
       await ctx.runMutation(internal.crawl.setRunStatus, {
         crawlRunId,
-        message:
-          drafts.length > 0
-            ? `${drafts.length} bodies with serving members read from Legistar`
+        message: complete
+          ? `${drafts.length} bodies with serving members read from Legistar`
+          : drafts.length > 0
+            ? `Legistar covers ${drafts.length} bodies${linked ? "" : " and the city site does not link it"}; reading the website as well`
             : "Legistar lists the bodies but no serving members; reading the website instead",
       });
-      if (drafts.length > 0) return { source: "legistar", candidates: 0 };
+      if (complete) return { source: "legistar", candidates: 0 };
       await ctx.runMutation(internal.crawl.setRunStatus, { crawlRunId, source: "firecrawl" });
     }
     const mapped = await firecrawl.map(ctx, websiteUrl, { search: "boards commissions committees" });
