@@ -1,0 +1,171 @@
+import { convexTest } from "convex-test";
+import { describe, expect, it } from "vitest";
+import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import schema from "./schema";
+import { normalizeTermEnd } from "./lib/termDates";
+
+const modules = import.meta.glob("./**/*.ts");
+const now = Date.UTC(2026, 8, 11, 12, 0, 0);
+
+type Harness = ReturnType<typeof convexTest>;
+
+async function asClerk(t: Harness) {
+  const userId = await t.run(async (ctx) => ctx.db.insert("users", { name: "Clerk", role: "clerk" as const }));
+  return t.withIdentity({ subject: `${userId}|session` });
+}
+
+async function seedRun(t: Harness) {
+  return t.run(async (ctx) => {
+    const cityId = await ctx.db.insert("cities", {
+      name: "Testville",
+      domain: "testville.gov",
+      slug: "testville",
+      websiteUrl: "https://testville.gov",
+      status: "draft" as const,
+    });
+    const crawlRunId = await ctx.db.insert("crawlRuns", {
+      cityId,
+      purpose: "bootstrap" as const,
+      source: "firecrawl" as const,
+      status: "review" as const,
+      startedAt: now,
+      pageCount: 0,
+      documentCount: 0,
+      draftCount: 0,
+      log: [],
+    });
+    return { cityId, crawlRunId };
+  });
+}
+
+const rosterDraft = (sourceUrl = "https://testville.gov/maddy.pdf") => ({
+  name: "Planning Commission",
+  meetingCadence: "2nd Tuesday",
+  termLength: null,
+  termLimit: null,
+  seatCount: null,
+  members: [
+    { name: "Ada Lovelace", role: "Chair", appointed: "8/24", termEnd: "12/26", snippet: "Ada 12/26", confidence: "grounded" as const },
+    { name: "Bo Diddley", role: null, appointed: null, termEnd: null, snippet: "Bo", confidence: "unknown" as const },
+  ],
+  snippet: "Planning Commission roster",
+  sourceUrl,
+});
+
+describe("recordExtraction", () => {
+  it("inserts one pending draft per body", async () => {
+    const t = convexTest(schema, modules);
+    const { cityId, crawlRunId } = await seedRun(t);
+    const result = await t.mutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts: [rosterDraft()] });
+    expect(result).toEqual({ draftCount: 1, mergedCount: 0 });
+    const drafts = await t.query(api.drafts.list, { cityId });
+    expect(drafts).toHaveLength(1);
+    expect(drafts[0].members).toHaveLength(2);
+  });
+
+  it("folds a rules page draft into the roster draft of the same body in one run", async () => {
+    const t = convexTest(schema, modules);
+    const { cityId, crawlRunId } = await seedRun(t);
+    await t.mutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts: [rosterDraft()] });
+    const second = await t.mutation(internal.drafts.recordExtraction, {
+      cityId,
+      crawlRunId,
+      drafts: [
+        {
+          name: "planning commission",
+          meetingCadence: null,
+          termLength: "four years",
+          termLimit: "two terms",
+          seatCount: 7,
+          members: [],
+          snippet: "rules",
+          sourceUrl: "https://testville.gov/rules",
+        },
+      ],
+    });
+    expect(second).toEqual({ draftCount: 0, mergedCount: 1 });
+    const drafts = await t.query(api.drafts.list, { cityId });
+    expect(drafts).toHaveLength(1);
+    expect(drafts[0].termLength).toBe("four years");
+    expect(drafts[0].seatCount).toBe(7);
+    expect(drafts[0].members).toHaveLength(2);
+    expect(drafts[0].sourceUrl).toBe("https://testville.gov/maddy.pdf");
+  });
+});
+
+describe("drafts.confirm", () => {
+  async function pendingDraft(t: Harness) {
+    const { cityId, crawlRunId } = await seedRun(t);
+    await t.mutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts: [{ ...rosterDraft(), seatCount: 3 }] });
+    const drafts = await t.query(api.drafts.list, { cityId });
+    return { cityId, draftId: drafts[0]._id as Id<"drafts"> };
+  }
+
+  it("turns a draft into a confirmed body with a seat, member and term each", async () => {
+    const t = convexTest(schema, modules);
+    const { cityId, draftId } = await pendingDraft(t);
+    const clerk = await asClerk(t);
+    const bodyId = await clerk.mutation(api.drafts.confirm, { draftId });
+    const board = await t.query(api.roster.board, { bodyId, now });
+    expect(board?.body.confirmed).toBe(true);
+    expect(board?.body.sourceUrl).toBe("https://testville.gov/maddy.pdf");
+    expect(board?.seats.map((row) => row.member?.name ?? null)).toEqual(["Ada Lovelace", "Bo Diddley", null]);
+    expect(board?.seats[0].seat.label).toBe("Chair");
+    expect(board?.seats[0].term?.endsAt).toBe(normalizeTermEnd("12/26"));
+    expect(board?.seats[0].term?.rawEnd).toBe("12/26");
+    expect(board?.seats[0].term?.rawStart).toBe("8/24");
+    expect(board?.seats[0].term?.current).toBe(true);
+    expect(board?.seats[1].term?.endsAt).toBeUndefined();
+    expect(board?.seats[2].status).toBe("vacant");
+    const pending = await t.query(api.drafts.list, { cityId });
+    expect(pending).toHaveLength(0);
+  });
+
+  it("applies the clerk's edits over the extracted values", async () => {
+    const t = convexTest(schema, modules);
+    const { draftId } = await pendingDraft(t);
+    const clerk = await asClerk(t);
+    const bodyId = await clerk.mutation(api.drafts.confirm, {
+      draftId,
+      edits: {
+        name: "Planning Commission (renamed)",
+        termLength: "four years",
+        seatCount: null,
+        members: [{ name: "Cy Young", role: null, appointed: null, termEnd: "6/30/2030", snippet: "Cy", confidence: "grounded" }],
+      },
+    });
+    const board = await t.query(api.roster.board, { bodyId, now });
+    expect(board?.body.name).toBe("Planning Commission (renamed)");
+    expect(board?.body.termLength).toBe("four years");
+    expect(board?.seats).toHaveLength(1);
+    expect(board?.seats[0].member?.name).toBe("Cy Young");
+  });
+
+  it("refuses a second confirm of the same draft", async () => {
+    const t = convexTest(schema, modules);
+    const { draftId } = await pendingDraft(t);
+    const clerk = await asClerk(t);
+    await clerk.mutation(api.drafts.confirm, { draftId });
+    await expect(clerk.mutation(api.drafts.confirm, { draftId })).rejects.toThrow(/already confirmed/);
+  });
+
+  it("refuses anyone who is not a clerk", async () => {
+    const t = convexTest(schema, modules);
+    const { draftId } = await pendingDraft(t);
+    await expect(t.mutation(api.drafts.confirm, { draftId })).rejects.toThrow(/Sign in/);
+  });
+});
+
+describe("drafts.dismiss", () => {
+  it("moves a draft out of the pending list", async () => {
+    const t = convexTest(schema, modules);
+    const { cityId, crawlRunId } = await seedRun(t);
+    await t.mutation(internal.drafts.recordExtraction, { cityId, crawlRunId, drafts: [rosterDraft()] });
+    const [draft] = await t.query(api.drafts.list, { cityId });
+    const clerk = await asClerk(t);
+    await clerk.mutation(api.drafts.dismiss, { draftId: draft._id });
+    expect(await t.query(api.drafts.list, { cityId })).toHaveLength(0);
+    expect(await t.query(api.drafts.list, { cityId, status: "dismissed" })).toHaveLength(1);
+  });
+});
