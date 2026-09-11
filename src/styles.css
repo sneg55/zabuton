@@ -214,6 +214,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .provenance q { font-style: italic; }
 
 @media (max-width: 860px) {
+  .wordmark small { display: none; }
+  .topbar { height: auto; padding: 14px 0; gap: 12px; }
+  .hero { padding: 32px 0 24px; }
+  .body-card-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .body-card-head .name { font-size: 1.1rem; }
+  .counts .pill-zero { display: none; }
+  .page-head { flex-direction: column; align-items: flex-start; }
   .shell { grid-template-columns: 1fr; }
   .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
   .rail nav { display: flex; flex-wrap: wrap; }
