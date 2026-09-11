@@ -9,7 +9,7 @@ const modules = import.meta.glob("./**/*.ts");
 
 async function seedBody(t: ReturnType<typeof convexTest>) {
   return t.run(async (ctx) => {
-    const cityId = await ctx.db.insert("cities", { name: "Testville", domain: "testville.gov", status: "draft" });
+    const cityId = await ctx.db.insert("cities", { name: "Testville", domain: "testville.gov", slug: "testville", websiteUrl: "https://testville.gov", status: "draft" });
     const bodyId = await ctx.db.insert("bodies", { cityId, name: "Planning Commission", sourceUrl: "https://testville.gov/pc", confirmed: false });
     const memberA = await ctx.db.insert("members", { cityId, name: "Ada" });
     const memberB = await ctx.db.insert("members", { cityId, name: "Bo" });

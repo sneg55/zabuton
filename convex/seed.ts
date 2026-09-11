@@ -35,7 +35,13 @@ export const loadDublin = internalMutation({
       .withIndex("by_domain", (q) => q.eq("domain", "dublin.ca.gov"))
       .unique();
     if (existing) return { cityId: existing._id, created: false };
-    const cityId = await ctx.db.insert("cities", { name: "Dublin, CA", domain: "dublin.ca.gov", status: "draft" });
+    const cityId = await ctx.db.insert("cities", {
+      name: "Dublin, CA",
+      domain: "dublin.ca.gov",
+      slug: "dublin-ca",
+      websiteUrl: "https://www.dublin.ca.gov",
+      status: "draft",
+    });
     const rulesByName = new Map((rules as { bodies: ExtractedBody[] }).bodies.map((b) => [canonical(b.name), b]));
     for (const body of (roster as { bodies: ExtractedBody[] }).bodies) {
       const rule = rulesByName.get(canonical(body.name));

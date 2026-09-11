@@ -10,11 +10,15 @@
 
 import type * as auth from "../auth.js";
 import type * as dev from "../dev.js";
+import type * as firecrawl from "../firecrawl.js";
 import type * as http from "../http.js";
 import type * as lib_seatStatus from "../lib/seatStatus.js";
 import type * as lib_termDates from "../lib/termDates.js";
+import type * as mail from "../mail.js";
 import type * as roster from "../roster.js";
 import type * as seed from "../seed.js";
+import type * as users from "../users.js";
+import type * as workflow from "../workflow.js";
 
 import type {
   ApiFromModules,
@@ -25,11 +29,15 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   dev: typeof dev;
+  firecrawl: typeof firecrawl;
   http: typeof http;
   "lib/seatStatus": typeof lib_seatStatus;
   "lib/termDates": typeof lib_termDates;
+  mail: typeof mail;
   roster: typeof roster;
   seed: typeof seed;
+  users: typeof users;
+  workflow: typeof workflow;
 }>;
 
 /**
@@ -60,4 +68,7 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   staticHosting: import("@convex-dev/static-hosting/_generated/component.js").ComponentApi<"staticHosting">;
+  firecrawl: import("@firecrawl/firecrawl-convex/_generated/component.js").ComponentApi<"firecrawl">;
+  agentmail: import("@agentmail/convex/_generated/component.js").ComponentApi<"agentmail">;
+  workflow: import("@convex-dev/workflow/_generated/component.js").ComponentApi<"workflow">;
 };
