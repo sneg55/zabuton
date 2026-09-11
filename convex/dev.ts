@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
+import { isGenericBodyName } from "./lib/draftTypes";
 
 export const setTermEnd = internalMutation({
   args: { bodyName: v.string(), ordinal: v.number(), endsAt: v.union(v.number(), v.null()) },
@@ -32,5 +33,22 @@ export const renameCity = internalMutation({
     if (!city) throw new Error("no city " + slug);
     await ctx.db.patch(city._id, { name });
     return city._id;
+  },
+});
+
+export const pruneGenericDrafts = internalMutation({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const city = await ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
+    if (!city) throw new Error("no city " + slug);
+    const drafts = await ctx.db.query("drafts").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect();
+    let n = 0;
+    for (const d of drafts) {
+      if (d.status === "pending" && isGenericBodyName(d.name)) {
+        await ctx.db.patch(d._id, { status: "dismissed" });
+        n += 1;
+      }
+    }
+    return n;
   },
 });

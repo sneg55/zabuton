@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
-import { canonicalName, mergeDrafts, type DraftInput } from "./lib/draftTypes";
+import { canonicalName, isGenericBodyName, mergeDrafts, type DraftInput } from "./lib/draftTypes";
 import { normalizeTermEnd } from "./lib/termDates";
 import { draftMemberValidator, draftStatusValidator } from "./schema";
 import { requireClerk } from "./users";
@@ -43,6 +43,7 @@ export async function insertDrafts(
     pendingByName.set(canonicalName(row.name), { id: row._id, draft: row as DraftInput, documentId: row.documentId });
   }
   for (const draft of drafts) {
+    if (isGenericBodyName(draft.name)) continue;
     const key = canonicalName(draft.name);
     const existing = pendingByName.get(key);
     if (existing) {
@@ -77,6 +78,18 @@ export const recordExtraction = internalMutation({
     drafts: v.array(draftInputValidator),
   },
   handler: async (ctx, args) => insertDrafts(ctx, args),
+});
+
+export const dismissMany = mutation({
+  args: { draftIds: v.array(v.id("drafts")) },
+  handler: async (ctx, { draftIds }) => {
+    await requireClerk(ctx);
+    for (const draftId of draftIds) {
+      const draft = await ctx.db.get(draftId);
+      if (draft && draft.status === "pending") await ctx.db.patch(draftId, { status: "dismissed" });
+    }
+    return null;
+  },
 });
 
 export const list = query({

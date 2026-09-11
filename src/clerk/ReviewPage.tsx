@@ -3,14 +3,31 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
+import { draftEvidence, type Evidence } from "../../convex/lib/draftTypes";
 import { Empty, PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
+
+const EVIDENCE_LABEL: Record<Evidence, string> = {
+  members_dated: "Members with term dates",
+  members: "Members, no dates",
+  seats: "Seat counts only",
+  rules: "Term rules only",
+};
+const EVIDENCE_ORDER: Evidence[] = ["members_dated", "members", "seats", "rules"];
 
 export function ReviewPage() {
   const city = useCity();
   const drafts = useQuery(api.drafts.list, { cityId: city._id });
   const latest = useQuery(api.bootstrap.latestRun, { cityId: city._id, purpose: "bootstrap" });
+  const dismissMany = useMutation(api.drafts.dismissMany);
+  const [tab, setTab] = useState<Evidence | "all">("all");
   if (drafts === undefined) return null;
+  const byEvidence = new Map<Evidence, typeof drafts>();
+  for (const d of drafts) {
+    const e = draftEvidence(d);
+    byEvidence.set(e, [...(byEvidence.get(e) ?? []), d]);
+  }
+  const shown = (tab === "all" ? EVIDENCE_ORDER.flatMap((e) => byEvidence.get(e) ?? []) : byEvidence.get(tab) ?? []);
   return (
     <div className="page">
       <PageHead
@@ -23,8 +40,21 @@ export function ReviewPage() {
           Run the bootstrap from the <Link to="/">front page</Link>, or import a spreadsheet in Settings.
         </Empty>
       )}
+      {drafts.length > 0 && (
+        <div className="row between">
+          <div className="tabs" style={{ borderBottom: 0 }}>
+            <button className={tab === "all" ? "active" : ""} onClick={() => setTab("all")}>All {drafts.length}</button>
+            {EVIDENCE_ORDER.filter((e) => byEvidence.has(e)).map((e) => (
+              <button key={e} className={tab === e ? "active" : ""} onClick={() => setTab(e)}>{EVIDENCE_LABEL[e]} {byEvidence.get(e)!.length}</button>
+            ))}
+          </div>
+          {tab !== "all" && shown.length > 0 && (
+            <button className="btn btn-quiet btn-sm" onClick={() => void dismissMany({ draftIds: shown.map((d) => d._id) })}>Dismiss all {shown.length} in this group</button>
+          )}
+        </div>
+      )}
       <div className="stack" style={{ gap: 16 }}>
-        {drafts.map((d) => <DraftCard key={d._id} draft={d} />)}
+        {shown.map((d) => <DraftCard key={d._id} draft={d} />)}
       </div>
     </div>
   );

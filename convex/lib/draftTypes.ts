@@ -65,3 +65,32 @@ export function mergeRunDrafts(drafts: DraftInput[]): DraftInput[] {
   }
   return order.map((key) => byName.get(key)!);
 }
+
+const GENERIC_BODY_NAMES = new Set([
+  "boards", "commissions", "committees", "authorities", "board", "commission", "committee",
+  "boards and commissions", "city boards and commissions", "boards commissions and committees",
+  "committee board commission", "board commission or advisory committee", "ad hoc committee",
+  "city council", "council", "staff", "members", "vacancies", "current vacancies",
+]);
+
+const BODY_WORDS = /\b(board|commission|committee|authority|council|task force|panel|trustees|agency|district|corporation|foundation)\b/i;
+
+export function isGenericBodyName(name: string): boolean {
+  const key = canonicalName(name);
+  if (key === "" || GENERIC_BODY_NAMES.has(key)) return true;
+  const words = key.split(" ").filter((w) => w !== "");
+  if (words.length === 1) return true;
+  if (words.length > 12) return true;
+  if (!BODY_WORDS.test(name) && words.length < 3) return true;
+  if (/\b(criteria|applications?|opportunit\w*|meeting calendar|agendas?|minutes|manual|report|policy|ordinance|resolution)\b/i.test(name)) return true;
+  return false;
+}
+
+export type Evidence = "members_dated" | "members" | "seats" | "rules";
+
+export function draftEvidence(draft: { members: Array<{ termEnd: string | null }>; seatCount: number | null; termLength: string | null; termLimit: string | null }): Evidence {
+  if (draft.members.length > 0 && draft.members.some((m) => m.termEnd)) return "members_dated";
+  if (draft.members.length > 0) return "members";
+  if (draft.seatCount !== null) return "seats";
+  return "rules";
+}
