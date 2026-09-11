@@ -1,10 +1,10 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import {
   DRAFT_INSTRUCTIONS,
-  isoDate,
+  longDate,
   noticePrompt,
   noticeTemplate,
   NOTICE_SCHEMA,
@@ -75,7 +75,7 @@ export const seatContext = internalQuery({
         bodyName: body.name,
         seatLabel: seat.label ?? null,
         memberName: member.name,
-        termEnd: term.rawEnd ?? (term.endsAt ? isoDate(term.endsAt) : null),
+        termEnd: term.endsAt ? longDate(term.endsAt) : term.rawEnd ?? null,
         termLength: body.termLength ?? null,
         meetingCadence: body.meetingCadence ?? null,
         kind,
@@ -111,7 +111,7 @@ export const draft = action({
   args: { seatId: v.id("seats"), kind: noticeKindValidator },
   handler: async (ctx, { seatId, kind }): Promise<Id<"notices">> => {
     const seat: SeatContext | null = await ctx.runQuery(internal.notices.seatContext, { seatId, kind });
-    if (!seat) throw new Error("This seat has no current member to write to");
+    if (!seat) throw new ConvexError("This seat has no current member to write to");
     const raw = await requestDraft(DRAFT_INSTRUCTIONS, noticePrompt(seat.context), {
       name: "notice",
       schema: NOTICE_SCHEMA,
@@ -134,12 +134,12 @@ export const approve = mutation({
   handler: async (ctx, { noticeId }) => {
     const clerk = await requireClerk(ctx);
     const notice = await ctx.db.get(noticeId);
-    if (!notice) throw new Error("Notice not found");
-    if (notice.status === "sent") throw new Error("Notice already sent");
-    if (notice.status === "approved") throw new Error("Notice already approved and queued");
+    if (!notice) throw new ConvexError("Notice not found");
+    if (notice.status === "sent") throw new ConvexError("Notice already sent");
+    if (notice.status === "approved") throw new ConvexError("Notice already approved and queued");
     const member = await ctx.db.get(notice.memberId);
-    if (!member) throw new Error("Member not found");
-    if (!member.email) throw new Error("Member has no email");
+    if (!member) throw new ConvexError("Member not found");
+    if (!member.email) throw new ConvexError("Member has no email");
     await ctx.db.patch(noticeId, {
       status: "approved",
       approvedBy: clerk._id,
@@ -157,7 +157,7 @@ export const discard = mutation({
     await requireClerk(ctx);
     const notice = await ctx.db.get(noticeId);
     if (!notice) return null;
-    if (notice.status === "sent") throw new Error("A sent notice cannot be discarded");
+    if (notice.status === "sent") throw new ConvexError("A sent notice cannot be discarded");
     await ctx.db.delete(noticeId);
     return null;
   },

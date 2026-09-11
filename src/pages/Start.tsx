@@ -6,6 +6,7 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
 import { Empty } from "../ui/PageHead";
 import { SiteFrame } from "../ui/Site";
+import { errorText } from "../lib/errors";
 
 const STEPS: Array<{ key: Doc<"crawlRuns">["status"][]; label: string }> = [
   { key: ["queued", "discovering"], label: "Finding pages" },
@@ -34,7 +35,7 @@ export function Start() {
     started.current = true;
     start({ url })
       .then((r) => setRunId(r.crawlRunId))
-      .catch((e: Error) => setError(e.message.replace(/^.*Uncaught Error: /, "").split("\n")[0]));
+      .catch((e: unknown) => setError(errorText(e)));
   }, [url, start]);
   const status = useQuery(api.bootstrap.status, runId ? { crawlRunId: runId } : "skip");
   return (

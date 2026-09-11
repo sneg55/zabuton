@@ -6,6 +6,7 @@ import type { Doc } from "../../convex/_generated/dataModel";
 import { draftEvidence, type Evidence } from "../../convex/lib/draftTypes";
 import { Empty, PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
+import { errorText } from "../lib/errors";
 
 const EVIDENCE_LABEL: Record<Evidence, string> = {
   members_dated: "Members with term dates",
@@ -125,7 +126,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
               setBusy(true);
               setError(null);
               confirm({ draftId: draft._id, edits: { name, termLength: termLength || undefined, termLimit: termLimit || undefined, members } })
-                .catch((e: Error) => setError(e.message.split("\n")[0]))
+                .catch((e: unknown) => setError(errorText(e)))
                 .finally(() => setBusy(false));
             }}
           >

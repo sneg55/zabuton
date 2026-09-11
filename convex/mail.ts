@@ -1,5 +1,5 @@
 import { AgentMail, vOutboundId, type OutboundId } from "@agentmail/convex";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalAction, internalMutation, query, type ActionCtx } from "./_generated/server";
@@ -93,14 +93,14 @@ export const ensureInbox = action({
   args: { cityId: v.id("cities") },
   handler: async (ctx, { cityId }): Promise<{ inboxId: string; address: string }> => {
     const city = await ctx.runQuery(internal.mailStore.cityForInbox, { cityId });
-    if (!city) throw new Error("City not found");
+    if (!city) throw new ConvexError("City not found");
     if (city.inboxId) return { inboxId: city.inboxId, address: city.inboxAddress ?? city.inboxId };
     const inbox = (await agentMail.createInbox(mailCtx(ctx), {
       username: city.slug,
       displayName: `${city.name} City Clerk`,
     })) as { inbox_id?: string; email?: string } | null;
     const inboxId = inbox?.inbox_id;
-    if (!inboxId) throw new Error("AgentMail did not return an inbox");
+    if (!inboxId) throw new ConvexError("AgentMail did not return an inbox");
     const address = inbox.email ?? inboxId;
     await ctx.runMutation(internal.mailStore.saveInbox, { cityId, inboxId, address });
     return { inboxId, address };

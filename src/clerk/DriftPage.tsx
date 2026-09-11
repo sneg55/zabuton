@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import { formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
+import { errorText } from "../lib/errors";
 
 const FIELD_LABEL: Record<string, string> = {
   member_added: "On the city page, not tracked",
@@ -28,7 +29,7 @@ export function DriftPage() {
         actions={
           <div className="row">
             {latest && <span className="small muted">Last check {formatDateTime(latest.finishedAt ?? latest.startedAt)}{running ? ", running" : latest.status === "failed" ? ", failed" : ""}</span>}
-            <button className="btn btn-secondary" disabled={!!running} onClick={() => { setError(null); runNow({ cityId: city._id }).catch((e: Error) => setError(e.message.split("\n")[0])); }}>
+            <button className="btn btn-secondary" disabled={!!running} onClick={() => { setError(null); runNow({ cityId: city._id }).catch((e: unknown) => setError(errorText(e))); }}>
               Check the city site now
             </button>
           </div>

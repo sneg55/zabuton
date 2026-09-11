@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
+import { errorText } from "../lib/errors";
 
 export function SettingsPage() {
   const city = useCity();
@@ -22,7 +23,7 @@ export function SettingsPage() {
   const run = (p: Promise<unknown>, ok: string) => {
     setMessage(null);
     setError(null);
-    p.then(() => setMessage(ok)).catch((e: Error) => setError(e.message.split("\n")[0]));
+    p.then(() => setMessage(ok)).catch((e: unknown) => setError(errorText(e)));
   };
   return (
     <div className="page">

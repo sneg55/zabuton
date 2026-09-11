@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalAction, internalMutation, internalQuery } from "./_generated/server";
@@ -33,7 +33,7 @@ export type DocumentPayload = {
 
 export function openAiKey(): string {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("OPENAI_API_KEY is not set on this deployment");
+  if (!key) throw new ConvexError("OPENAI_API_KEY is not set on this deployment");
   return key;
 }
 
@@ -41,7 +41,7 @@ type ContentPart = Record<string, string>;
 
 export function contentFor(payload: DocumentPayload): ContentPart[] {
   if (payload.bytes.byteLength > MAX_DOCUMENT_BYTES) {
-    throw new Error(`Document is ${Math.round(payload.bytes.byteLength / 1024 / 1024)} MB, over the extraction limit`);
+    throw new ConvexError(`Document is ${Math.round(payload.bytes.byteLength / 1024 / 1024)} MB, over the extraction limit`);
   }
   const bytes = new Uint8Array(payload.bytes);
   if (looksLikePdf(payload.url, payload.contentType, bytes)) {
@@ -67,7 +67,7 @@ async function callResponses(model: string, instructions: string, content: Conte
     }),
   });
   if (!response.ok) {
-    throw new Error(`OpenAI answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
+    throw new ConvexError(`OpenAI answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
   }
   return parseResponsesOutput(await response.json());
 }
@@ -105,7 +105,7 @@ export async function publishedRosterFor(ctx: ScrapeCtx, sourceUrl: string): Pro
   } catch {
     const scraped = await firecrawl.scrape(ctx, sourceUrl, { formats: ["markdown"] });
     const markdown = scraped.markdown ?? "";
-    if (markdown === "") throw new Error("The source page could not be read");
+    if (markdown === "") throw new ConvexError("The source page could not be read");
     bytes = new TextEncoder().encode(markdown).buffer as ArrayBuffer;
     contentType = SCRAPED_CONTENT_TYPE;
   }
@@ -149,7 +149,7 @@ export const processDocument = internalAction({
     if (document.storageId === null) return { kind: "other", draftCount: 0 };
     try {
       const blob = await ctx.storage.get(document.storageId as Id<"_storage">);
-      if (!blob) throw new Error("The fetched bytes are gone from storage");
+      if (!blob) throw new ConvexError("The fetched bytes are gone from storage");
       const payload: DocumentPayload = {
         url: document.url,
         contentType: document.contentType,

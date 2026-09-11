@@ -1,5 +1,5 @@
 import { vResultValidator, vWorkflowId } from "@convex-dev/workflow";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
@@ -39,7 +39,7 @@ export async function createBootstrapRun(ctx: MutationCtx, url: string, now: num
     .filter((q) => q.eq(q.field("purpose"), "bootstrap"))
     .collect();
   if (overRunCap(bootstrapRuns.map((run) => run.startedAt), now)) {
-    throw new Error("Zabuton has started 30 crawls in the last 24 hours. Try again later.");
+    throw new ConvexError("Zabuton has started 30 crawls in the last 24 hours. Try again later.");
   }
   const city = await ensureCity(ctx, url);
   const cityRuns = await ctx.db
@@ -47,7 +47,7 @@ export async function createBootstrapRun(ctx: MutationCtx, url: string, now: num
     .withIndex("by_city", (q) => q.eq("cityId", city._id))
     .collect();
   const running = cityRuns.find((run) => IN_PROGRESS_STATUSES.includes(run.status as (typeof IN_PROGRESS_STATUSES)[number]));
-  if (running) throw new Error(`A crawl of ${city.name} is already running`);
+  if (running) throw new ConvexError(`A crawl of ${city.name} is already running`);
   const crawlRunId = await ctx.db.insert("crawlRuns", {
     cityId: city._id,
     purpose: "bootstrap",
@@ -178,9 +178,9 @@ export const importCsv = mutation({
   handler: async (ctx, { cityId, csv }) => {
     await requireClerk(ctx);
     const city = await ctx.db.get(cityId);
-    if (!city) throw new Error("That city is gone");
+    if (!city) throw new ConvexError("That city is gone");
     const drafts = csvToDrafts(csv, city.websiteUrl);
-    if (drafts.length === 0) throw new Error("The CSV has no body rows");
+    if (drafts.length === 0) throw new ConvexError("The CSV has no body rows");
     const now = Date.now();
     const crawlRunId = await ctx.db.insert("crawlRuns", {
       cityId,

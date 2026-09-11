@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { query, type MutationCtx, type QueryCtx } from "./_generated/server";
 
@@ -14,8 +15,8 @@ export const me = query({
 
 export async function requireClerk(ctx: QueryCtx | MutationCtx) {
   const userId = await getAuthUserId(ctx);
-  if (!userId) throw new Error("Sign in required");
+  if (!userId) throw new ConvexError("Sign in required");
   const user = await ctx.db.get(userId);
-  if (!user || user.role !== "clerk") throw new Error("Clerk role required");
+  if (!user || user.role !== "clerk") throw new ConvexError("Clerk role required");
   return user;
 }

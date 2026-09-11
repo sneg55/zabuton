@@ -5,6 +5,7 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
+import { errorText } from "../lib/errors";
 
 type State = Doc<"applications">["state"];
 
@@ -113,7 +114,7 @@ function ApplicationDetail({ id, onClose }: { id: Id<"applications">; onClose: (
                     setBusy(true);
                     setState({ applicationId: id, state: target, replyText: reply.trim() || undefined })
                       .then(() => { setTarget(null); setReply(""); })
-                      .catch((e: Error) => setError(e.message.split("\n")[0]))
+                      .catch((e: unknown) => setError(errorText(e)))
                       .finally(() => setBusy(false));
                   }}
                 >

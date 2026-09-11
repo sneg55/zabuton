@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { DraftInput, DraftMemberInput } from "./lib/draftTypes";
 import type { PublishedMember } from "./lib/driftDiff";
 
@@ -131,7 +132,7 @@ export function bodyToDraft(body: LegistarBody, records: LegistarOfficeRecord[],
 
 async function getJson(url: string): Promise<unknown> {
   const response = await fetch(url, { headers: { accept: "application/json" } });
-  if (!response.ok) throw new Error(`Legistar answered ${response.status} for ${url}`);
+  if (!response.ok) throw new ConvexError(`Legistar answered ${response.status} for ${url}`);
   return response.json();
 }
 

@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalQuery, mutation, query, type QueryCtx } from "./_generated/server";
@@ -72,13 +72,13 @@ export const submit = mutation({
       .query("cities")
       .withIndex("by_slug", (q) => q.eq("slug", args.citySlug))
       .unique();
-    if (!city) throw new Error("City not found");
+    if (!city) throw new ConvexError("City not found");
     const applicantName = args.applicantName.trim();
     const email = args.email.trim();
     const statement = args.statement.trim();
-    if (applicantName.length === 0) throw new Error("Enter your name");
-    if (!EMAIL.test(email)) throw new Error("Enter a valid email address");
-    if (statement.length === 0) throw new Error("Tell the clerk why you want to serve");
+    if (applicantName.length === 0) throw new ConvexError("Enter your name");
+    if (!EMAIL.test(email)) throw new ConvexError("Enter a valid email address");
+    if (statement.length === 0) throw new ConvexError("Tell the clerk why you want to serve");
     const seat = args.seatId ? await ctx.db.get(args.seatId) : null;
     const bodyId = args.bodyId ?? seat?.bodyId;
     const now = Date.now();
@@ -163,7 +163,7 @@ export const draftReply = action({
     const context: ApplicationContext | null = await ctx.runQuery(internal.applications.replyContext, {
       applicationId,
     });
-    if (!context) throw new Error("Application not found");
+    if (!context) throw new ConvexError("Application not found");
     const drafted = await requestDraft(DRAFT_INSTRUCTIONS, applicationReplyPrompt(context, state));
     return { text: drafted ?? applicationReplyTemplate(context, state as ApplicationState) };
   },
@@ -179,7 +179,7 @@ export const setState = mutation({
   handler: async (ctx, { applicationId, state, replyText, note }) => {
     await requireClerk(ctx);
     const application = await ctx.db.get(applicationId);
-    if (!application) throw new Error("Application not found");
+    if (!application) throw new ConvexError("Application not found");
     const now = Date.now();
     await ctx.db.patch(applicationId, { state, updatedAt: now });
     const reply = replyText?.trim();

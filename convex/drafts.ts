@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
 import { canonicalName, isGenericBodyName, mergeDrafts, type DraftInput } from "./lib/draftTypes";
@@ -126,8 +126,8 @@ export async function confirmDraft(
   },
 ): Promise<Id<"bodies">> {
   const draft = await ctx.db.get(draftId);
-  if (!draft) throw new Error("That draft is gone");
-  if (draft.status === "confirmed") throw new Error("That draft is already confirmed");
+  if (!draft) throw new ConvexError("That draft is gone");
+  if (draft.status === "confirmed") throw new ConvexError("That draft is already confirmed");
   const name = edits?.name ?? draft.name;
   const members = edits?.members ?? draft.members;
   const seatCount = edits?.seatCount === undefined ? draft.seatCount : edits.seatCount;
@@ -179,8 +179,8 @@ export const dismiss = mutation({
   handler: async (ctx, { draftId }) => {
     await requireClerk(ctx);
     const draft = await ctx.db.get(draftId);
-    if (!draft) throw new Error("That draft is gone");
-    if (draft.status === "confirmed") throw new Error("That draft is already confirmed");
+    if (!draft) throw new ConvexError("That draft is gone");
+    if (draft.status === "confirmed") throw new ConvexError("That draft is already confirmed");
     await ctx.db.patch(draftId, { status: "dismissed" });
     return null;
   },

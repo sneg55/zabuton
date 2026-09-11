@@ -26,7 +26,7 @@ describe("notices.draft", () => {
     expect(notice?.status).toBe("draft");
     expect(notice?.subject).toBe("Your term on the Planning Commission, Seat 1 is ending");
     expect(notice?.body).toContain("Dear Bo Ito,");
-    expect(notice?.body).toContain("ends on 12/26");
+    expect(notice?.body).toContain("ends on December 31, 2026");
     expect(notice?.body).not.toMatch(/[—–]/);
     expect(notice?.memberId).toBe(fixture.memberId);
     expect(notice?.bodyId).toBe(fixture.bodyId);

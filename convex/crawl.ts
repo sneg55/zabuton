@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalAction, internalMutation, internalQuery } from "./_generated/server";
@@ -260,7 +260,7 @@ export const fetchDocument = internalAction({
       try {
         const scraped = await firecrawl.scrape(ctx, document.url, { formats: ["markdown"] });
         const markdown = scraped.markdown ?? "";
-        if (markdown === "") throw new Error("Firecrawl returned no markdown");
+        if (markdown === "") throw new ConvexError("Firecrawl returned no markdown");
         const storageId = await ctx.storage.store(new Blob([markdown], { type: SCRAPED_CONTENT_TYPE }));
         await ctx.runMutation(internal.crawl.storeFetched, {
           documentId,

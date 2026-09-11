@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
@@ -180,7 +180,7 @@ export const driftWorkflow = workflow.define({
 
 export async function createDriftRun(ctx: MutationCtx, cityId: Id<"cities">, now: number): Promise<Id<"crawlRuns">> {
   const city = await ctx.db.get(cityId);
-  if (!city) throw new Error("That city is gone");
+  if (!city) throw new ConvexError("That city is gone");
   return ctx.db.insert("crawlRuns", {
     cityId,
     purpose: "drift",
@@ -243,8 +243,8 @@ export async function resolveFlag(
   action: "accept_published" | "keep_tracked",
 ): Promise<null> {
   const flag = await ctx.db.get(flagId);
-  if (!flag) throw new Error("That flag is gone");
-  if (flag.status === "resolved") throw new Error("That flag is already resolved");
+  if (!flag) throw new ConvexError("That flag is gone");
+  if (flag.status === "resolved") throw new ConvexError("That flag is already resolved");
   if (action === "accept_published" && flag.seatId) {
     const terms = await ctx.db
       .query("terms")

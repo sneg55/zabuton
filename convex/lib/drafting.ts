@@ -50,6 +50,10 @@ export function termEndFrom(now: number, termLength: string | null | undefined):
   return years === null ? undefined : addYears(now, years);
 }
 
+export function longDate(at: number): string {
+  return new Date(at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+}
+
 export function isoDate(at: number): string {
   return new Date(at).toISOString().slice(0, 10);
 }

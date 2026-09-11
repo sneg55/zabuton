@@ -6,6 +6,7 @@ import { formatDate, formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { StatusPill } from "../ui/StatusPill";
 import { useCity } from "./Shell";
+import { errorText } from "../lib/errors";
 
 const KIND_LABEL: Record<Doc<"notices">["kind"], string> = { term_expiry: "Term expiry", reappointment: "Reappointment" };
 
@@ -58,7 +59,7 @@ export function NoticesPage() {
                               onClick={() => {
                                 setBusy(row.seat._id + kind);
                                 setError(null);
-                                draft({ seatId: row.seat._id, kind }).catch((e: Error) => setError(e.message.split("\n")[0])).finally(() => setBusy(null));
+                                draft({ seatId: row.seat._id, kind }).catch((e: unknown) => setError(errorText(e))).finally(() => setBusy(null));
                               }}
                             >
                               Draft {KIND_LABEL[kind].toLowerCase()}
@@ -92,7 +93,7 @@ export function NoticesPage() {
                     onClick={() => {
                       setBusy(n._id);
                       setError(null);
-                      approve({ noticeId: n._id }).catch((e: Error) => setError(e.message.split("\n")[0])).finally(() => setBusy(null));
+                      approve({ noticeId: n._id }).catch((e: unknown) => setError(errorText(e))).finally(() => setBusy(null));
                     }}
                   >
                     Approve and send
