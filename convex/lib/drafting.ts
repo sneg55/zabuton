@@ -187,6 +187,28 @@ export function noticePrompt(context: NoticeContext): string {
   ].join("\n");
 }
 
+export const NOTICE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: { subject: { type: "string" }, body: { type: "string" } },
+  required: ["subject", "body"],
+};
+
+export function parseNoticeDraft(raw: string | null): Draft | null {
+  if (!raw) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const { subject, body } = parsed as { subject?: unknown; body?: unknown };
+  if (typeof subject !== "string" || typeof body !== "string") return null;
+  if (subject.trim().length === 0 || body.trim().length === 0) return null;
+  return { subject: sanitizeDraft(subject), body: sanitizeDraft(body) };
+}
+
 export function extractResponseText(payload: unknown): string | null {
   if (typeof payload !== "object" || payload === null) return null;
   const record = payload as { output_text?: unknown; output?: unknown };
@@ -205,4 +227,36 @@ export function extractResponseText(payload: unknown): string | null {
   }
   const text = parts.join("").trim();
   return text.length > 0 ? text : null;
+}
+
+export const DRAFT_MODEL = "gpt-5.4-mini";
+
+export async function requestDraft(
+  instructions: string,
+  prompt: string,
+  schema?: { name: string; schema: unknown },
+): Promise<string | null> {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return null;
+  const body: Record<string, unknown> = {
+    model: DRAFT_MODEL,
+    instructions,
+    input: [{ role: "user", content: [{ type: "input_text", text: prompt }] }],
+  };
+  if (schema) {
+    body.text = { format: { type: "json_schema", name: schema.name, strict: true, schema: schema.schema } };
+  }
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    const text = extractResponseText(await response.json());
+    if (text === null) return null;
+    return schema ? text : sanitizeDraft(text);
+  } catch {
+    return null;
+  }
 }
