@@ -13,7 +13,7 @@ import {
   titleFromUrl,
 } from "./lib/discover";
 import type { DraftInput } from "./lib/draftTypes";
-import { fetchWithBrowserUa } from "./lib/httpFetch";
+import { fetchWithBrowserUa, textOf } from "./lib/httpFetch";
 import {
   bodyToDraft,
   fetchOfficeRecords,
@@ -22,6 +22,7 @@ import {
   probeLegistarClient,
   selectBodies,
 } from "./legistar";
+import { cityNameFromTitle, titleOfHtml } from "./lib/cityName";
 import { crawlSourceValidator, crawlStatusValidator } from "./schema";
 
 export const LEGISTAR_BODY_CAP = 60;
@@ -100,6 +101,17 @@ export const runDocuments = internalQuery({
   },
 });
 
+export const setCityName = internalMutation({
+  args: { cityId: v.id("cities"), name: v.string() },
+  handler: async (ctx, { cityId, name }) => {
+    const city = await ctx.db.get(cityId);
+    if (!city) return null;
+    const autoName = city.name === city.slug.split("-").map((l) => (l.length === 2 ? l.toUpperCase() : l.charAt(0).toUpperCase() + l.slice(1))).join(", ");
+    if (autoName) await ctx.db.patch(cityId, { name });
+    return null;
+  },
+});
+
 export const recordCandidates = internalMutation({
   args: {
     cityId: v.id("cities"),
@@ -165,6 +177,13 @@ export const discover = internalAction({
     domain: v.string(),
   },
   handler: async (ctx, { cityId, crawlRunId, websiteUrl, domain }): Promise<{ source: "legistar" | "firecrawl"; candidates: number }> => {
+    try {
+      const home = await fetchWithBrowserUa(websiteUrl);
+      const name = cityNameFromTitle(titleOfHtml(textOf(home.bytes, home.contentType)));
+      if (name) await ctx.runMutation(internal.crawl.setCityName, { cityId, name });
+    } catch {
+      await ctx.runMutation(internal.crawl.setRunStatus, { crawlRunId, message: `${domain} did not answer a plain request; the site may block automated visitors` });
+    }
     const legistar = await probeLegistarClient(legistarClientGuesses(domain));
     if (legistar) {
       const matched = selectBodies(legistar.bodies);
@@ -194,9 +213,13 @@ export const discover = internalAction({
       }
       await ctx.runMutation(internal.crawl.setRunStatus, {
         crawlRunId,
-        message: `${drafts.length} bodies with serving members read from Legistar`,
+        message:
+          drafts.length > 0
+            ? `${drafts.length} bodies with serving members read from Legistar`
+            : "Legistar lists the bodies but no serving members; reading the website instead",
       });
-      return { source: "legistar", candidates: 0 };
+      if (drafts.length > 0) return { source: "legistar", candidates: 0 };
+      await ctx.runMutation(internal.crawl.setRunStatus, { crawlRunId, source: "firecrawl" });
     }
     const mapped = await firecrawl.map(ctx, websiteUrl, { search: "boards commissions committees" });
     const candidates = filterCandidateUrls(mapped.links ?? [], CANDIDATE_URL_CAP);
