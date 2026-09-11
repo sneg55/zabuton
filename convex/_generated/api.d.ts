@@ -8,18 +8,27 @@
  * @module
  */
 
-import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
+import type * as bootstrap from "../bootstrap.js";
+import type * as cities from "../cities.js";
+import type * as crawl from "../crawl.js";
+import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
+import type * as drafts from "../drafts.js";
+import type * as drift from "../drift.js";
+import type * as extract from "../extract.js";
 import type * as firecrawl from "../firecrawl.js";
 import type * as http from "../http.js";
-import type * as lib_drafting from "../lib/drafting.js";
+import type * as legistar from "../legistar.js";
+import type * as lib_csv from "../lib/csv.js";
+import type * as lib_discover from "../lib/discover.js";
+import type * as lib_draftTypes from "../lib/draftTypes.js";
+import type * as lib_driftDiff from "../lib/driftDiff.js";
+import type * as lib_extraction from "../lib/extraction.js";
+import type * as lib_httpFetch from "../lib/httpFetch.js";
 import type * as lib_seatStatus from "../lib/seatStatus.js";
 import type * as lib_termDates from "../lib/termDates.js";
 import type * as mail from "../mail.js";
-import type * as mailStore from "../mailStore.js";
-import type * as members from "../members.js";
-import type * as notices from "../notices.js";
 import type * as roster from "../roster.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
@@ -32,18 +41,27 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  applications: typeof applications;
   auth: typeof auth;
+  bootstrap: typeof bootstrap;
+  cities: typeof cities;
+  crawl: typeof crawl;
+  crons: typeof crons;
   dev: typeof dev;
+  drafts: typeof drafts;
+  drift: typeof drift;
+  extract: typeof extract;
   firecrawl: typeof firecrawl;
   http: typeof http;
-  "lib/drafting": typeof lib_drafting;
+  legistar: typeof legistar;
+  "lib/csv": typeof lib_csv;
+  "lib/discover": typeof lib_discover;
+  "lib/draftTypes": typeof lib_draftTypes;
+  "lib/driftDiff": typeof lib_driftDiff;
+  "lib/extraction": typeof lib_extraction;
+  "lib/httpFetch": typeof lib_httpFetch;
   "lib/seatStatus": typeof lib_seatStatus;
   "lib/termDates": typeof lib_termDates;
   mail: typeof mail;
-  mailStore: typeof mailStore;
-  members: typeof members;
-  notices: typeof notices;
   roster: typeof roster;
   seed: typeof seed;
   users: typeof users;
