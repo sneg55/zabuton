@@ -46,6 +46,13 @@ export function parseRawStart(raw: string | undefined): number | undefined {
   return Number.isNaN(iso) ? undefined : iso;
 }
 
+export function formatRawDate(raw: string | undefined): string {
+  if (!raw) return "Unknown";
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+  if (iso) return formatDate(Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])));
+  return raw;
+}
+
 export function pluralize(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? "" : "s"}`;
 }

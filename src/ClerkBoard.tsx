@@ -2,7 +2,7 @@ import { useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
-import { formatDate } from "./lib/format";
+import { formatDate, formatRawDate } from "./lib/format";
 import { Empty, PageHead } from "./ui/PageHead";
 import { StatusPill } from "./ui/StatusPill";
 import { TermBar } from "./ui/TermBar";
@@ -70,7 +70,7 @@ function BodySeats({ bodyId }: { bodyId: Id<"bodies"> }) {
                 <td>{seat.label ?? seat.ordinal}</td>
                 <td>{member?.name ?? <span className="muted">Open</span>}</td>
                 <td><TermBar startsAt={term?.startsAt ?? parseRawStart(term?.rawStart)} endsAt={term?.endsAt} status={status} /></td>
-                <td className="muted">{term?.rawStart ?? "Unknown"}</td>
+                <td className="muted">{formatRawDate(term?.rawStart)}</td>
                 <td className="num">{formatDate(term?.endsAt, term?.rawEnd)}</td>
                 <td><StatusPill status={status} /></td>
                 <td>{term && <a className="small" href={term.sourceUrl} target="_blank" rel="noreferrer" title={term.snippet}>Source</a>}</td>

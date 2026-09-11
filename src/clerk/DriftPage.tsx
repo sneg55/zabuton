@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../convex/_generated/api";
-import { formatDateTime } from "../lib/format";
+import { formatDateTime, formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
@@ -50,7 +50,7 @@ export function DriftPage() {
             </div>
             <div className="diff">
               <div><div className="label">City page says</div>{f.published || <span className="muted">Nothing</span>}</div>
-              <div><div className="label">Tracked here</div>{f.tracked || <span className="muted">Nothing</span>}</div>
+              <div><div className="label">Tracked here</div>{f.tracked ? formatRawDate(f.tracked) : <span className="muted">Nothing</span>}</div>
             </div>
             {f.snippet && <span className="provenance"><q>{f.snippet}</q></span>}
             <div className="row">
