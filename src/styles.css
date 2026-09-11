@@ -1,0 +1,27 @@
+:root { font-family: system-ui, sans-serif; color: #1a1a1a; background: #fafaf7; }
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+header { display: flex; justify-content: space-between; align-items: baseline; }
+h1 { font-size: 1.4rem; margin: 0 0 16px; }
+.muted { color: #777; }
+.error { color: #b00020; }
+.signin { display: grid; gap: 12px; max-width: 320px; }
+.signin label { display: grid; gap: 4px; font-size: 0.9rem; }
+.signin input { padding: 8px; font: inherit; }
+button { font: inherit; padding: 8px 12px; cursor: pointer; }
+button.link { background: none; border: none; color: #2a5db0; padding: 0; text-align: left; }
+.cities { display: flex; gap: 8px; margin-bottom: 16px; }
+.cities .active { font-weight: 600; }
+.bodies { display: grid; gap: 8px; }
+.body { border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+.body-head { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: none; border: none; text-align: left; padding: 12px; }
+.body-head .name { font-weight: 600; }
+.counts { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #eee; }
+.pill.zero { opacity: 0.4; }
+.pill.expired { background: #fde2e1; color: #8a1c14; }
+.pill.expiring { background: #fff1c2; color: #7a5200; }
+.pill.vacant { background: #e3ecfb; color: #1f4b99; }
+.pill.active { background: #e3f5e6; color: #1e6b32; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { text-align: left; padding: 6px 12px; border-top: 1px solid #eee; }
+tr.expired td { background: #fff7f7; }
