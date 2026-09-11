@@ -10,7 +10,8 @@
     "convex": "^1.45.0",
     "openai": "^7.15.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",

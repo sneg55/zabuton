@@ -1,27 +1,20 @@
-import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { ClerkBoard } from "./ClerkBoard";
-import { SignIn } from "./SignIn";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BoardPage } from "./clerk/BoardPage";
+import { ClerkShell } from "./clerk/Shell";
+import { Landing } from "./pages/Landing";
+import { Openings, PublicCity } from "./pages/PublicCity";
 
 export default function App() {
-  const { signOut } = useAuthActions();
   return (
-    <main>
-      <header>
-        <h1>Zabuton</h1>
-        <Authenticated>
-          <button onClick={() => void signOut()}>Sign out</button>
-        </Authenticated>
-      </header>
-      <AuthLoading>
-        <p className="muted">Loading</p>
-      </AuthLoading>
-      <Unauthenticated>
-        <SignIn />
-      </Unauthenticated>
-      <Authenticated>
-        <ClerkBoard />
-      </Authenticated>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/c/:slug" element={<PublicCity />} />
+        <Route path="/c/:slug/openings" element={<Openings />} />
+        <Route path="/clerk" element={<ClerkShell />}>
+          <Route index element={<BoardPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
