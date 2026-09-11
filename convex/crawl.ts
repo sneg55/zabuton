@@ -59,12 +59,21 @@ export const finishRun = internalMutation({
       .collect();
     const run = await ctx.db.get(crawlRunId);
     if (!run) return null;
+    const flags = await ctx.db
+      .query("driftFlags")
+      .withIndex("by_city", (q) => q.eq("cityId", run.cityId))
+      .filter((q) => q.eq(q.field("crawlRunId"), crawlRunId))
+      .collect();
     const message =
-      drafts.length === 0
-        ? "No roster could be read from this site. Import a CSV instead."
-        : `${drafts.length} draft bodies ready for review`;
+      run.purpose === "drift"
+        ? flags.length === 0
+          ? "The tracked roster matches the city site"
+          : `${flags.length} differences found between the city site and the tracked roster`
+        : drafts.length === 0
+          ? "No roster could be read from this site. Import a CSV instead."
+          : `${drafts.length} draft bodies ready for review`;
     await ctx.db.patch(crawlRunId, {
-      status: drafts.length === 0 ? "done" : "review",
+      status: run.purpose === "drift" || drafts.length === 0 ? "done" : "review",
       finishedAt: Date.now(),
       documentCount: documents.length,
       pageCount: documents.filter((d) => d.fetchedAt !== undefined).length,
