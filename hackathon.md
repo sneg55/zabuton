@@ -20,7 +20,7 @@ City clerks. Every city has ten to thirty appointed bodies. Seats have terms, te
 
 ## The three-minute demo
 
-1. Paste Dublin's URL. The roster fills from the city's Local Appointments List PDF; the Youth Advisory Committee flags ended terms, the December seats flag expiring.
+1. Paste Dublin's URL. Legistar covers three bodies and the city does not link it, so the run reads the website as well: 17 pages and documents, 7 bodies with members and term dates, merged with the term rules from the boards page. Confirm them; the December seats flag expiring, two seats are vacant, and a committee whose page stopped in 2022 shows three ended terms.
 2. Open a body whose page has no term data: the field says unknown and links the source.
 3. A resident applies from a second window; the application appears on the clerk's desk mid-sentence. The clerk approves a drafted on-thread reply.
 4. Drift: the city page changed. The flag shows what the page says next to what is tracked.
@@ -34,4 +34,5 @@ Convex (database, queries, mutations, actions, workflow, auth, static hosting), 
 
 - 2026-08-27: research and spec. Firecrawl extraction was the unproven leg.
 - 2026-09-11: proof first. OpenAI extraction with provenance on Dublin's Maddy Act PDF returned every member grounded; the same schema on a vacancy notice mis-slotted a count, which is why classification runs before extraction. Ann Arbor turned out to expose the Legistar API, so a second adapter reads rosters as JSON. Then schema, auth, roster queries, the clerk board, and the live site the same day.
+- 2026-09-11, evening: Dublin rebuilt from scratch through the live pipeline rather than the seed, so the demo state is what a judge gets by pasting the URL. That run showed Legistar coverage can be partial (Dublin's instance lists three bodies), which is why Legistar is trusted alone only when the city links it and it covers at least five bodies.
 - 2026-09-11, later: the full product. Durable bootstrap workflow (discover, fetch, classify and extract), draft review with per-field provenance, public roster and openings pages, applications with one thread per applicant, notices behind clerk approval, daily drift check, CSV import. First live runs: Ann Arbor produced 51 draft bodies from Legistar in seconds; Riverside also answers Legistar but with no serving members, fell through to Firecrawl, and produced 59 drafts from 35 documents in about a minute, which forced a generic-name filter and an evidence ranking on the review page. A drift check against Dublin's live PDF flagged a deliberately altered term end with both sides shown.

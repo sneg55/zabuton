@@ -7,7 +7,7 @@ import { Nameplate } from "../ui/Nameplate";
 import { SiteFrame } from "../ui/Site";
 import { StatusPill } from "../ui/StatusPill";
 
-const EXAMPLE_BODIES = ["Planning Commission", "Youth Advisory Committee"];
+const EXAMPLE_BODIES = ["Planning Commission", "Parks and Community Services Commission", "Tri-Valley Accessible Advisory Committee"];
 
 export function Landing() {
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ function ExampleDais() {
       <div className="dais-head">
         <div>
           <span className="display display-md">{city.name}</span>
-          <span className="muted">, read from the city's Local Appointments List</span>
+          <span className="muted">, read from the city's own boards and commissions pages</span>
         </div>
         <div className="counts">
           <StatusPill status="expired" count={totals.expired} />
