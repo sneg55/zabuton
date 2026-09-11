@@ -40,7 +40,7 @@ export const loadDublin = internalMutation({
       domain: "dublin.ca.gov",
       slug: "dublin-ca",
       websiteUrl: "https://www.dublin.ca.gov",
-      status: "draft",
+      status: "confirmed",
     });
     const rulesByName = new Map((rules as { bodies: ExtractedBody[] }).bodies.map((b) => [canonical(b.name), b]));
     for (const body of (roster as { bodies: ExtractedBody[] }).bodies) {
@@ -53,7 +53,7 @@ export const loadDublin = internalMutation({
         termLimit: body.term_limit ?? rule?.term_limit ?? undefined,
         seatCount: body.seat_count ?? undefined,
         sourceUrl: ROSTER_URL,
-        confirmed: false,
+        confirmed: true,
       });
       let ordinal = 0;
       for (const m of body.members) {

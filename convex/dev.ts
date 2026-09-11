@@ -52,3 +52,15 @@ export const pruneGenericDrafts = internalMutation({
     return n;
   },
 });
+
+export const confirmCity = internalMutation({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const city = await ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
+    if (!city) throw new ConvexError("no city " + slug);
+    await ctx.db.patch(city._id, { status: "confirmed" });
+    const bodies = await ctx.db.query("bodies").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect();
+    for (const b of bodies) await ctx.db.patch(b._id, { confirmed: true });
+    return bodies.length;
+  },
+});
