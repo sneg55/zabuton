@@ -11,6 +11,8 @@ export const agentMail = new AgentMail(components.agentmail, {
 });
 
 const RECONCILE_DELAY_MS = 8_000;
+const RECONCILE_RETRY_MS = 60_000;
+const RECONCILE_MAX_ATTEMPTS = 3;
 const APPLICATION_LABELS = ["application"];
 const NOTICE_LABELS = ["notice"];
 
@@ -106,9 +108,23 @@ export const ensureInbox = action({
 });
 
 export const reconcileOutbound = internalAction({
-  args: { threadId: v.id("threads"), messageRowId: v.optional(v.id("messages")), outboundId: vOutboundId },
-  handler: async (ctx, { threadId, messageRowId, outboundId }) => {
-    await syncOutbound(ctx, { threadId, messageRowId: messageRowId ?? null, outboundId });
+  args: {
+    threadId: v.id("threads"),
+    messageRowId: v.optional(v.id("messages")),
+    outboundId: vOutboundId,
+    attempt: v.optional(v.number()),
+  },
+  handler: async (ctx, { threadId, messageRowId, outboundId, attempt }) => {
+    const resolved = await syncOutbound(ctx, { threadId, messageRowId: messageRowId ?? null, outboundId });
+    const tries = attempt ?? 1;
+    if (resolved === null && tries < RECONCILE_MAX_ATTEMPTS) {
+      await ctx.scheduler.runAfter(RECONCILE_RETRY_MS, internal.mail.reconcileOutbound, {
+        threadId,
+        messageRowId,
+        outboundId,
+        attempt: tries + 1,
+      });
+    }
     return null;
   },
 });

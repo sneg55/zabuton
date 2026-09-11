@@ -136,6 +136,7 @@ export const approve = mutation({
     const notice = await ctx.db.get(noticeId);
     if (!notice) throw new Error("Notice not found");
     if (notice.status === "sent") throw new Error("Notice already sent");
+    if (notice.status === "approved") throw new Error("Notice already approved and queued");
     const member = await ctx.db.get(notice.memberId);
     if (!member) throw new Error("Member not found");
     if (!member.email) throw new Error("Member has no email");

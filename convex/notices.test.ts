@@ -104,6 +104,17 @@ describe("notices.approve", () => {
     const threads = await t.run(async (ctx) => ctx.db.query("threads").collect());
     expect(threads).toEqual([]);
   });
+
+  it("refuses a second approval of the same notice", async () => {
+    const t = convexTest(schema, modules);
+    const fixture = await seedCity(t);
+    const noticeId = await draftFor(t, fixture.seatId);
+    const clerk = await asClerk(t);
+    await clerk.mutation(api.members.setEmail, { memberId: fixture.memberId, email: "bo@example.com" });
+    await clerk.mutation(api.notices.approve, { noticeId });
+    await expect(clerk.mutation(api.notices.approve, { noticeId })).rejects.toThrow("already approved");
+    await flushMail(t);
+  });
 });
 
 describe("notices.discard", () => {
