@@ -67,4 +67,38 @@ export const cities = query({
   handler: async (ctx) => ctx.db.query("cities").collect(),
 });
 
+export const cityBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) =>
+    ctx.db
+      .query("cities")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique(),
+});
+
+export const cityById = query({
+  args: { cityId: v.id("cities") },
+  handler: async (ctx, { cityId }) => ctx.db.get(cityId),
+});
+
+export const openings = query({
+  args: { cityId: v.id("cities"), now: v.optional(v.number()) },
+  handler: async (ctx, { cityId, now }) => {
+    const at = now ?? Date.now();
+    const bodies = await ctx.db
+      .query("bodies")
+      .withIndex("by_city", (q) => q.eq("cityId", cityId))
+      .collect();
+    const out: Array<{ body: Doc<"bodies">; row: SeatRow }> = [];
+    for (const body of bodies) {
+      for (const row of await seatRows(ctx, body, at)) {
+        if (row.status !== "active") out.push({ body, row });
+      }
+    }
+    const rank: Record<SeatStatus, number> = { vacant: 0, expired: 1, expiring: 2, active: 3 };
+    out.sort((a, b) => rank[a.row.status] - rank[b.row.status] || a.body.name.localeCompare(b.body.name));
+    return out;
+  },
+});
+
 export type CityId = Id<"cities">;
