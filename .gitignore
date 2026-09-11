@@ -6,3 +6,4 @@ dist/
 .DS_Store
 CLAUDE.local.md
 .harness/
+tsconfig.tsbuildinfo
