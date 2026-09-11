@@ -1,0 +1,506 @@
+{
+ "bodies": [
+  {
+   "name": "Planning Commission",
+   "meeting_cadence": "Meets the 2nd & 4th Tuesday of every month at 7pm in the Council Chambers.",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Wahida Rashid",
+     "role": null,
+     "appointed": "8/24",
+     "term_end": "12/26",
+     "snippet": "*Wahida Rashid 12/26\nAppointed 8/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Srinivas Badami",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Srinivas Badami 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Guanghui Han",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Guanghui Han 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Jaisena Prasath",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Jaisena Prasath 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Margaret Simuro",
+     "role": null,
+     "appointed": "10/25",
+     "term_end": "12/26",
+     "snippet": "*Margaret Simuro 12/26\nAppointed 10/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "John Wu",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "John Wu (alternate) 12/26 \nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Suresh Puli",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "Suresh Puli (alternate) 12/26\nAppointed 12/24",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "PLANNING COMMISSION \u2013 Meets the \n2nd & 4th Tuesday of every month at 7pm in\nthe Council Chambers."
+  },
+  {
+   "name": "Senior Center Advisory Committee",
+   "meeting_cadence": "Meets the 1st Thursday of February, May, August, and November at 9:30am at the Senior Center.",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Regis Harvey",
+     "role": null,
+     "appointed": "7/25",
+     "term_end": "12/26",
+     "snippet": "*Regis Harvey 12/26\nAppointed 7/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Steve Kau",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Steve Kau 12/28\nRe-Appointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Tao Luo",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Tao Luo 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Kebin Lu",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Kebin Lu 12/26\nRe-Appointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Michael Goldstein",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "Michael Goldstein (alternate) 12/26\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Namrata Berry",
+     "role": "alternate",
+     "appointed": "10/25",
+     "term_end": "12/26",
+     "snippet": "*Namrata Berry (alternate) 12/26\nAppointed 10/25",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "SENIOR CENTER ADVISORY \nCOMMITTEE \u2013 Meets the 1st Thursday of \nFebruary, May, August, and November at \n9:30am at the Senior Center."
+  },
+  {
+   "name": "Parks & Community Services Commission",
+   "meeting_cadence": "Meets the 3rd Monday of every month at 7pm in the Council Chambers.",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Richard Thornbury",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Richard Thornbury 12/26\nRe-Appointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sameer Hakim",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Sameer Hakim 12/26\nRe-Appointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sumit Aneja",
+     "role": null,
+     "appointed": "10/25",
+     "term_end": "12/28",
+     "snippet": "*Sumit Aneja 12/28\nAppointed 10/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Pradeep Routra",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Pradeep Routra 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Joseph Washington",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Joseph Washington 12/26\nRe-Appointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Pawan Sohi",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "Pawan Sohi (alternate) 12/26\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Amarissa Koelling",
+     "role": "alternate",
+     "appointed": "01/26",
+     "term_end": "12/26",
+     "snippet": "*Amarissa Koelling (alternate) 12/26\nAppointed 01/26",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sanjana Gidwani",
+     "role": "Student Rep",
+     "appointed": "7/25",
+     "term_end": "6/26",
+     "snippet": "Sanjana Gidwani (Student Rep) 6/26 \nAppointed 7/25",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "PARKS & COMMUNITY \nSERVICES COMMISSION \u2013 Meets the \n3rd Monday of every month at 7pm in the \nCouncil Chambers."
+  },
+  {
+   "name": "Youth Advisory Committee",
+   "meeting_cadence": "Meets the 4th Wednesday of every month at 7:00pm at the Shannon Community Center.",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Alex McComb",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Alex McComb 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Angad Hayer",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Angad Hayer 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Avika Vyawahare",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Avika Vyawahare 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Hrihaan Setia",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Hrihaan Setia 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Kaitlin Weiss",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Kaitlin Weiss 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Landon Colley",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Landon Colley 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Mehek Kothari",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Mehek Kothari 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Neel KarurParekh",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Neel KarurParekh 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sharanya Donepudi",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Sharanya Donepudi 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Trisha Bollapragada",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Trisha Bollapragada 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Varnika Sathish",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Varnika Sathish 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Vir Tawadia",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Vir Tawadia 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Yma Santos",
+     "role": null,
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Yma Santos 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Prajval Balakavi",
+     "role": "Alternate",
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Prajval Balakavi (Alternate) 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sophie Ma",
+     "role": "Alternate",
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Sophie Ma (Alternate) 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Tirtha Sivanandam",
+     "role": "Alternate",
+     "appointed": "5/25",
+     "term_end": "5/26",
+     "snippet": "Tirtha Sivanandam (Alternate) 5/26\nAppointed 5/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Sanjana Gidwani",
+     "role": "PCS Student Rep",
+     "appointed": "5/25",
+     "term_end": "6/26",
+     "snippet": "Sanjana Gidwani (PCS Student Rep)6/26\nAppointed 5/25",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "YOUTH ADVISORY COMMITTEE \n\u2013 Meets the 4th Wednesday of every month at \n7:00pm at the Shannon Community Center."
+  },
+  {
+   "name": "Mosquito Abatement District Board",
+   "meeting_cadence": "Meets the 2nd Wednesday of every month at 5pm at the District Office in Hayward.",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Kashef Qaadri",
+     "role": null,
+     "appointed": "12/23",
+     "term_end": "1/28",
+     "snippet": "Kashef Qaadri 1/28\nRe-appointed 12/23",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "MOSQUITO ABATEMENT \nDISTRICT BOARD \u2013 Meets the 2nd\nWednesday of every month at 5pm at the \nDistrict Office in Hayward."
+  },
+  {
+   "name": "Human Services Commission",
+   "meeting_cadence": "Tentatively meets the 4th Thursday of each quarter in the Council Chambers",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Vasanth Chetan",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Vasanth Chetan 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Siyu Henningsen",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Siyu Henningsen 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Rose Hunt",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Rose Hunt 12/26 \nAppointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Baljeet Sangha",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Baljeet Sangha 12/26\nAppointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Adam Lumia",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Adam Lumia 12/28\nRe-Appointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Bradyn Shaw",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "Bradyn Shaw (alternate) 12/26\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Naveena Rudrapada",
+     "role": "alternate",
+     "appointed": "12/24",
+     "term_end": "12/26",
+     "snippet": "Naveena Rudrapada (alternate) 12/26\nAppointed 12/24",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "HUMAN SERVICES COMMISSION \n\u2013 Tentatively meets the 4th Thursday of each \nquarter in the Council Chambers"
+  },
+  {
+   "name": "Heritage & Cultural Arts Commission",
+   "meeting_cadence": "Meets the 2nd Thursday every month at 7pm in the Council Chambers",
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "Jain Archana",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Jain Archana 12/28\nAppointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Gina Gabriell",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Gina Gabriell 12/26\nRe-Appointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Timea Iharosi",
+     "role": null,
+     "appointed": "12/22",
+     "term_end": "12/26",
+     "snippet": "Timea Iharosi 12/26\nAppointed 12/22",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Shweta Agrawal",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Shweta Agrawal 12/28\nRe-Appointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Darren Phillips",
+     "role": null,
+     "appointed": "1/24",
+     "term_end": "12/26",
+     "snippet": "*Darren Phillips 12/26\nAppointed 1/24 ",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Victoria Liu",
+     "role": null,
+     "appointed": "7/25",
+     "term_end": "12/28",
+     "snippet": "*Victoria Liu 12/28\nAppointed 7/25",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Julia Tomtania",
+     "role": null,
+     "appointed": "12/24",
+     "term_end": "12/28",
+     "snippet": "Julia Tomtania 12/28\nRe-Appointed 12/24",
+     "confidence": "grounded"
+    },
+    {
+     "name": "Salim Razawi",
+     "role": "alternate",
+     "appointed": "10/25",
+     "term_end": "12/26",
+     "snippet": "*Salim Razawi (alternate) 12/26\nAppointed 10/25",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "HERITAGE & CULTURAL ARTS \nCOMMISSION \u2013 Meets the 2nd Thursday \nevery month at 7pm in the Council Chambers"
+  }
+ ]
+}

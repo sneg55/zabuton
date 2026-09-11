@@ -13,6 +13,7 @@ import type * as http from "../http.js";
 import type * as lib_seatStatus from "../lib/seatStatus.js";
 import type * as lib_termDates from "../lib/termDates.js";
 import type * as roster from "../roster.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   "lib/seatStatus": typeof lib_seatStatus;
   "lib/termDates": typeof lib_termDates;
   roster: typeof roster;
+  seed: typeof seed;
 }>;
 
 /**
