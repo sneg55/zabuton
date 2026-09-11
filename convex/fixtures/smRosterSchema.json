@@ -1,0 +1,76 @@
+{
+ "bodies": [
+  {
+   "name": "Airport Commission",
+   "meeting_cadence": null,
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "",
+     "role": null,
+     "appointed": "1",
+     "term_end": "6/30/2030",
+     "snippet": "Airport Commission 1 6/30/2030 Resident of Santa Monica (Term may be adjusted due to Airport Conversion Project)",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "Airport Commission 1 6/30/2030 Resident of Santa Monica (Term may be adjusted due to Airport Conversion Project)"
+  },
+  {
+   "name": "Architectural Review Board",
+   "meeting_cadence": null,
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "",
+     "role": null,
+     "appointed": "2",
+     "term_end": "6/30/2030",
+     "snippet": "Architectural Review Board 2 6/30/2030 Persons qualified to: analyze architectural and environmental trends/information; appraise resource uses per Municipal Code; and be responsive to needs of the community. Experts in conservation, recreation, design, landscaping, the arts, urban planning, cultural-historical preservation, and ecological and environmental science",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "Architectural Review Board 2 6/30/2030 Persons qualified to: analyze architectural and environmental trends/information; appraise resource uses per Municipal Code; and be responsive to needs of the community. Experts in conservation, recreation, design, landscaping, the arts, urban planning, cultural-historical preservation, and ecological and environmental science"
+  },
+  {
+   "name": "Arts Commission",
+   "meeting_cadence": null,
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "",
+     "role": null,
+     "appointed": "1",
+     "term_end": "6/30/2030",
+     "snippet": "Arts Commission 1 6/30/2030 Reside or work in Santa Monica and shall be actively involved in the arts",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "Arts Commission 1 6/30/2030 Reside or work in Santa Monica and shall be actively involved in the arts"
+  },
+  {
+   "name": "Clean Beaches & Ocean Parcel Tax Citizens Oversight Committee",
+   "meeting_cadence": null,
+   "term_length": null,
+   "term_limit": null,
+   "seat_count": null,
+   "members": [
+    {
+     "name": "",
+     "role": null,
+     "appointed": "2",
+     "term_end": "6/30/2030",
+     "snippet": "Clean Beaches & Ocean Parcel Tax Citizens Oversight Committee 2 6/30/2030 Resident of Santa Monica",
+     "confidence": "grounded"
+    }
+   ],
+   "snippet": "Clean Beaches & Ocean Parcel Tax Citizens Oversight Committee 2 6/30/2030 Resident of Santa Monica"
+  }
+ ]
+}
