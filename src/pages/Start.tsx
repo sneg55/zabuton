@@ -27,23 +27,23 @@ export function Start() {
   const [params] = useSearchParams();
   const url = params.get("url") ?? "";
   const start = useMutation(api.bootstrap.start);
-  const [runId, setRunId] = useState<Id<"crawlRuns"> | null>(null);
+  const [runId, setRunId] = useState<Id<"crawlRuns"> | null>((params.get("run") as Id<"crawlRuns"> | null) ?? null);
   const [error, setError] = useState<string | null>(null);
   const started = useRef(false);
   useEffect(() => {
-    if (!url || started.current) return;
+    if (!url || started.current || runId) return;
     started.current = true;
     start({ url })
       .then((r) => setRunId(r.crawlRunId))
       .catch((e: unknown) => setError(errorText(e)));
-  }, [url, start]);
+  }, [url, start, runId]);
   const status = useQuery(api.bootstrap.status, runId ? { crawlRunId: runId } : "skip");
   return (
     <SiteFrame>
       <section className="hero" style={{ paddingBottom: 24 }}>
         <div className="hero-head">
           <h1 className="display display-xl">{status?.city?.name ?? hostOf(url)}</h1>
-          <p className="lede">Reading the boards and commissions pages at {hostOf(url)}. Each step is recorded below as it runs.</p>
+          <p className="lede">Reading the boards and commissions pages at {status?.city?.domain ?? hostOf(url)}. Each step is recorded below as it runs.</p>
         </div>
         {error && <div className="notice notice-danger">{error}</div>}
         {status && <RunView status={status} />}
