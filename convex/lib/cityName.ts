@@ -16,8 +16,9 @@ export function cityNameFromTitle(title: string | null): string | null {
     .map((p) => p.replace(LEADING_NOISE, "").trim())
     .filter((p) => p !== "" && !NOISE.test(p));
   if (parts.length === 0) return null;
-  const civic = parts.find((p) => /\b(city|town|village|county|borough|township)\b/i.test(p));
-  const pick = civic ?? parts[0];
+  const withState = parts.find((p) => /,\s*(?:[A-Z]{2}|[A-Z][a-z]+(?: [A-Z][a-z]+)?)$/.test(p));
+  const civic = parts.find((p) => /^(the )?(city|town|village|county|borough|township) of /i.test(p));
+  const pick = withState ?? civic ?? parts[0];
   if (pick.length > 60 || /[.!?]$/.test(pick) || pick.split(" ").length > 8) return null;
   return pick;
 }

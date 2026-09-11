@@ -6,6 +6,8 @@ describe("cityNameFromTitle", () => {
     expect(cityNameFromTitle("City of Ann Arbor, MI | Home")).toBe("City of Ann Arbor, MI");
     expect(cityNameFromTitle("Home - City of Riverside")).toBe("City of Riverside");
     expect(cityNameFromTitle("Dublin, CA - Official Website | Official Website")).toBe("Dublin, CA");
+    expect(cityNameFromTitle("Riverside, California | City of Arts & Innovation")).toBe("Riverside, California");
+    expect(cityNameFromTitle("Home | City of Ann Arbor")).toBe("City of Ann Arbor");
     expect(cityNameFromTitle("Welcome to the City of Palm Springs")).toBe("the City of Palm Springs");
   });
   it("returns null for empty or sentence-like titles", () => {

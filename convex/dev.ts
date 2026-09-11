@@ -24,3 +24,13 @@ export const setRole = internalMutation({
     return user._id;
   },
 });
+
+export const renameCity = internalMutation({
+  args: { slug: v.string(), name: v.string() },
+  handler: async (ctx, { slug, name }) => {
+    const city = await ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
+    if (!city) throw new Error("no city " + slug);
+    await ctx.db.patch(city._id, { name });
+    return city._id;
+  },
+});

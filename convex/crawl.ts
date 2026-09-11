@@ -13,7 +13,7 @@ import {
   titleFromUrl,
 } from "./lib/discover";
 import type { DraftInput } from "./lib/draftTypes";
-import { fetchWithBrowserUa, textOf } from "./lib/httpFetch";
+import { fetchWithBrowserUa } from "./lib/httpFetch";
 import {
   bodyToDraft,
   fetchOfficeRecords,
@@ -179,7 +179,7 @@ export const discover = internalAction({
   handler: async (ctx, { cityId, crawlRunId, websiteUrl, domain }): Promise<{ source: "legistar" | "firecrawl"; candidates: number }> => {
     try {
       const home = await fetchWithBrowserUa(websiteUrl);
-      const name = cityNameFromTitle(titleOfHtml(textOf(home.bytes, home.contentType)));
+      const name = cityNameFromTitle(titleOfHtml(new TextDecoder().decode(home.bytes)));
       if (name) await ctx.runMutation(internal.crawl.setCityName, { cityId, name });
     } catch {
       await ctx.runMutation(internal.crawl.setRunStatus, { crawlRunId, message: `${domain} did not answer a plain request; the site may block automated visitors` });

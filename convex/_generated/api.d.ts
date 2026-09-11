@@ -21,6 +21,7 @@ import type * as extract from "../extract.js";
 import type * as firecrawl from "../firecrawl.js";
 import type * as http from "../http.js";
 import type * as legistar from "../legistar.js";
+import type * as lib_cityName from "../lib/cityName.js";
 import type * as lib_csv from "../lib/csv.js";
 import type * as lib_discover from "../lib/discover.js";
 import type * as lib_draftTypes from "../lib/draftTypes.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   firecrawl: typeof firecrawl;
   http: typeof http;
   legistar: typeof legistar;
+  "lib/cityName": typeof lib_cityName;
   "lib/csv": typeof lib_csv;
   "lib/discover": typeof lib_discover;
   "lib/draftTypes": typeof lib_draftTypes;
