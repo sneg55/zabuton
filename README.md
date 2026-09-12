@@ -19,3 +19,7 @@ Set these on the Convex deployment: `FIRECRAWL_API_KEY`, `OPENAI_API_KEY`, `AGEN
 ```bash
 npm test
 ```
+
+## License
+
+MIT. See `LICENSE`.
