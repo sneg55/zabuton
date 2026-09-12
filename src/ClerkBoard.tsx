@@ -22,7 +22,7 @@ export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
     <div className="page">
       <PageHead
         title="Board"
-        intro={`${rows.length} bodies. Seats update the moment a term ends or an appointment is recorded.`}
+        intro={`${rows.length} ${rows.length === 1 ? "body" : "bodies"}. Seats update the moment a term ends or an appointment is recorded.`}
         actions={
           <div className="counts">
             <StatusPill status="expired" count={totals.expired} />

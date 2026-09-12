@@ -297,6 +297,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
   .rail nav { display: flex; flex-wrap: wrap; }
   .page { padding: 20px 16px 48px; }
+  .btn { white-space: normal; height: auto; min-height: 40px; padding-block: 8px; max-width: 100%; }
   .diff { grid-template-columns: 1fr; }
   .split-open { grid-template-columns: 1fr; }
   .urlform { flex-direction: column; }

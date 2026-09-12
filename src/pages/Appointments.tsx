@@ -65,7 +65,7 @@ export function Appointments() {
           </div>
           {rows && rows.length > 0 && (
             <p className="small muted">
-              {seatCount} seats across {rows.length} bodies. {endingSoon} {endingSoon === 1 ? "term ends" : "terms end"} within the next twelve months.
+              {seatCount} {seatCount === 1 ? "seat" : "seats"} across {rows.length} {rows.length === 1 ? "body" : "bodies"}. {endingSoon} {endingSoon === 1 ? "term ends" : "terms end"} within the next twelve months.
             </p>
           )}
         </div>
