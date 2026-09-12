@@ -1,0 +1,79 @@
+{
+  "$schema": "../node_modules/testreel/recording-definition.schema.json",
+  "url": "https://original-spoonbill-489.convex.site/clerk/review",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "outputFormat": "mp4",
+  "storageState": "out/state.json",
+  "cursor": {
+    "enabled": true,
+    "size": 30,
+    "color": "#145aff",
+    "rippleColor": "#5b8cff",
+    "rippleSize": 46,
+    "idleHide": false,
+    "transitionMs": 650
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "select",
+      "selector": ".rail-city select",
+      "value": "City of Pleasanton (yours, in setup)",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "hover",
+      "selector": "button:has-text(\"Members with term dates\") >> nth=0",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "click",
+      "selector": "button:has-text(\"Members with term dates\") >> nth=0",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "hover",
+      "selector": "button:has-text(\"Confirm \") >> nth=0",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "click",
+      "selector": "button:has-text(\"Confirm \") >> nth=0",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "navigate",
+      "url": "https://original-spoonbill-489.convex.site/c/cityofpleasantonca"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    }
+  ]
+}

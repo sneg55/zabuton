@@ -1,0 +1,59 @@
+{
+  "$schema": "../node_modules/testreel/recording-definition.schema.json",
+  "url": "https://original-spoonbill-489.convex.site/clerk/applications",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "outputFormat": "mp4",
+  "storageState": "out/state.json",
+  "cursor": {
+    "enabled": true,
+    "size": 30,
+    "color": "#145aff",
+    "rippleColor": "#5b8cff",
+    "rippleSize": 46,
+    "idleHide": false,
+    "transitionMs": 650
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "click",
+      "selector": "tr:has-text(\"Maya Okafor\")",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "scroll",
+      "y": 420
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "navigate",
+      "url": "https://original-spoonbill-489.convex.site/clerk/notices"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "hover",
+      "selector": "text=Drafted",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    }
+  ]
+}

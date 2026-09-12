@@ -1,0 +1,16 @@
+{
+  "$schema": "../node_modules/testreel/recording-definition.schema.json",
+  "url": "https://original-spoonbill-489.convex.site/",
+  "viewport": { "width": 1920, "height": 1080 }, "outputFormat": "mp4", "storageState": "out/state.json",
+  "cursor": { "enabled": true, "size": 30, "color": "#145aff", "rippleColor": "#5b8cff", "rippleSize": 46, "idleHide": false, "transitionMs": 650 },
+  "steps": [
+    { "action": "wait", "ms": 2500 },
+    { "action": "click", "selector": "input[type=\"url\"]" },
+    { "action": "type", "selector": "input[type=\"url\"]", "text": "https://www.cityofpleasantonca.gov", "delay": 45 },
+    { "action": "wait", "ms": 800 },
+    { "action": "click", "selector": "button:has-text(\"Build the roster\")" },
+    { "action": "wait", "ms": 9000 },
+    { "action": "scroll", "y": 350 },
+    { "action": "wait", "ms": 9000 }
+  ]
+}

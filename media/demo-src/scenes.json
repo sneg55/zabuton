@@ -1,0 +1,66 @@
+[
+  {
+    "id": "intro",
+    "sec": 12,
+    "kind": "card",
+    "caption": "Zabuton: boards and commissions, kept current",
+    "narrate": "This is Zabuton. It keeps a city's boards and commissions current: every seat, every term, read straight off the city's own website.",
+    "block": { "type": "title", "brand": "Zabuton", "sub": "Boards and commissions, kept current", "tag": "Convex  ·  Firecrawl  ·  OpenAI  ·  AgentMail" }
+  },
+  {
+    "id": "problem",
+    "sec": 16,
+    "kind": "card",
+    "caption": "The clerk's problem",
+    "narrate": "A city has dozens of volunteer seats with staggered terms. The clerk tracks them in a spreadsheet, until a term expires unnoticed, and in California the annual appointments list is required by law. The only onboarding path today is typing it all in by hand.",
+    "block": { "type": "bullets", "title": "The clerk's problem", "rows": ["Dozens of volunteer seats, staggered terms", "Tracked in a spreadsheet, until one expires unnoticed", "California requires a published annual appointments list", "Every vendor onboards by hand"] }
+  },
+  {
+    "id": "paste",
+    "sec": 24,
+    "kind": "ui",
+    "capture": "01-paste",
+    "caption": "Paste the city's website. Firecrawl maps it, OpenAI reads the rosters.",
+    "narrate": "Onboarding is one URL. Paste the city's website, and a durable Convex workflow takes over: Firecrawl maps the site and finds the boards and commissions pages, each page or P D F is fetched, then OpenAI classifies it and extracts members, roles and term dates. Every step is logged on screen while it runs, and a bot wall or a bad document never stops the run."
+  },
+  {
+    "id": "review",
+    "sec": 24,
+    "kind": "ui",
+    "capture": "02-review",
+    "caption": "Every name and date carries the sentence it came from",
+    "narrate": "Nothing goes live without the clerk. Each draft shows the sentence every name and date came from, and a date the city never published stays unknown rather than guessed. Confirm a body, and it appears on the public roster the same second, because the whole board is a live Convex query."
+  },
+  {
+    "id": "roster",
+    "sec": 26,
+    "kind": "ui",
+    "capture": "03-roster",
+    "caption": "Public roster, open seats, and an application form",
+    "narrate": "Residents get a public page: who holds each seat, when the term ends, and which seats are open or expiring. This is Dublin, California, read from the city's own pages. A resident picks an open seat and applies. The application lands on the clerk's desk with its own email thread."
+  },
+  {
+    "id": "desk",
+    "sec": 26,
+    "kind": "ui",
+    "capture": "04-desk",
+    "caption": "AgentMail: one thread per applicant, real replies both ways",
+    "narrate": "On the desk, each application is one conversation. The clerk moves it along, OpenAI drafts the reply from the record, and AgentMail sends it from the city's own inbox. When the applicant answers, the reply comes back through a webhook onto the same thread. Term expiry and reappointment notices are drafted the same way, and nothing is sent until the clerk approves it."
+  },
+  {
+    "id": "drift",
+    "sec": 24,
+    "kind": "ui",
+    "capture": "05-drift",
+    "caption": "Daily drift check, and the annual appointments list",
+    "narrate": "Cities change their pages without telling anyone. A daily cron re-reads every confirmed source and shows both sides when they disagree. Here Ann Arbor's Legistar records differ from the tracked roster, and the clerk decides. And the annual appointments list, the one the law requires, is a page and a C S V, prepared from the tracked roster."
+  },
+  {
+    "id": "outro",
+    "sec": 14,
+    "kind": "card",
+    "caption": "Open source, self-hostable, live on convex.site",
+    "narrate": "Zabuton runs on Convex: live queries, auth, the workflow component, crons and static hosting. Firecrawl for the crawl, OpenAI for grounded extraction, AgentMail for the mail. Open source, self-hostable, and live now.",
+    "block": { "type": "bullets", "title": "Built on", "rows": ["Convex: live board, auth, workflow, crons, hosting", "Firecrawl: map the city site, read behind bot walls", "OpenAI: extraction with provenance, drafted replies", "AgentMail: one inbox per city, one thread per applicant"] }
+  }
+]

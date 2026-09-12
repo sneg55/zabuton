@@ -1,0 +1,23 @@
+{
+  "$schema": "../node_modules/testreel/recording-definition.schema.json",
+  "url": "https://original-spoonbill-489.convex.site/c/dublin-ca",
+  "viewport": { "width": 1920, "height": 1080 }, "outputFormat": "mp4", "storageState": "out/state.json",
+  "cursor": { "enabled": true, "size": 30, "color": "#145aff", "rippleColor": "#5b8cff", "rippleSize": 46, "idleHide": false, "transitionMs": 650 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "hover", "selector": ".nameplate >> nth=1" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "hover", "selector": ".nameplate-vacant >> nth=0" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "click", "selector": "a:has-text(\"See open seats and apply\")" },
+    { "action": "wait", "ms": 3500 },
+    { "action": "click", "selector": "table a:has-text(\"Apply\") >> nth=0" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "type", "selector": "input[name=\"name\"]", "text": "Dana Whitfield", "delay": 40 },
+    { "action": "type", "selector": "input[name=\"email\"]", "text": "dana.whitfield@example.com", "delay": 30 },
+    { "action": "type", "selector": "textarea[name=\"statement\"]", "text": "I have lived in Dublin for nine years and chaired our school's arts booster group. I would like to bring that experience to the commission.", "delay": 12 },
+    { "action": "wait", "ms": 600 },
+    { "action": "click", "selector": "button:has-text(\"Send application\")" },
+    { "action": "wait", "ms": 4500 }
+  ]
+}

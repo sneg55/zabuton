@@ -7,3 +7,6 @@ dist/
 CLAUDE.local.md
 .harness/
 tsconfig.tsbuildinfo
+media/demo-src/out/
+media/demo-src/testreel-output/
+media/demo-src/.trash/

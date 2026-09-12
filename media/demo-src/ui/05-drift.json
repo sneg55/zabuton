@@ -1,0 +1,60 @@
+{
+  "$schema": "../node_modules/testreel/recording-definition.schema.json",
+  "url": "https://original-spoonbill-489.convex.site/clerk/drift",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "outputFormat": "mp4",
+  "storageState": "out/state.json",
+  "cursor": {
+    "enabled": true,
+    "size": 30,
+    "color": "#145aff",
+    "rippleColor": "#5b8cff",
+    "rippleSize": 46,
+    "idleHide": false,
+    "transitionMs": 650
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "select",
+      "selector": ".rail-city select",
+      "value": "City of Ann Arbor",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "hover",
+      "selector": "button:has-text(\"Update to what the city page says\") >> nth=0",
+      "timeout": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "navigate",
+      "url": "https://original-spoonbill-489.convex.site/c/a2gov/appointments"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "scroll",
+      "y": 500
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    }
+  ]
+}

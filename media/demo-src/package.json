@@ -1,0 +1,18 @@
+{
+  "name": "demo-src",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Source for the Zabuton demo video: testreel captures the live site, OpenAI TTS narrates, ffmpeg assembles the mp4.",
+  "scripts": {
+    "session": "node make-session.mjs",
+    "capture:ui": "for f in ui/*.json; do npx testreel \"$f\" --format mp4 || exit 1; done",
+    "cards": "node render-cards.mjs",
+    "tts": "node --env-file=/Users/sneg55/Documents/GitHub/stayed-shipped/.video/.env tts.mjs",
+    "build": "node --env-file=/Users/sneg55/Documents/GitHub/stayed-shipped/.video/.env build-video.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1",
+    "testreel": "0.2.0"
+  }
+}

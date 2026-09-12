@@ -325,3 +325,13 @@ export const deleteVacancyDriftFlags = internalMutation({
     return n;
   },
 });
+
+export const setCityOwner = internalMutation({
+  args: { slug: v.string(), userId: v.id("users") },
+  handler: async (ctx, { slug, userId }) => {
+    const city = await ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
+    if (!city) throw new ConvexError("no city " + slug);
+    await ctx.db.patch(city._id, { createdBy: userId });
+    return null;
+  },
+});
