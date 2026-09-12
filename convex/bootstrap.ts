@@ -150,6 +150,7 @@ export const onRunComplete = internalMutation({
 export const start = mutation({
   args: { url: v.string() },
   handler: async (ctx, { url }): Promise<{ cityId: Id<"cities">; crawlRunId: Id<"crawlRuns"> }> => {
+    if ((await getAuthUserId(ctx)) === null) throw new ConvexError("Sign in required");
     const run = await createBootstrapRun(ctx, url, Date.now());
     const workflowId = await workflow.start(
       ctx,

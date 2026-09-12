@@ -40,10 +40,12 @@ export async function insertDrafts(
     .withIndex("by_city", (q) => q.eq("cityId", cityId))
     .collect();
   const trackedNames = new Set(bodies.map((body) => canonicalName(body.name)));
-  const rows = await ctx.db
+  const cityDrafts = await ctx.db
     .query("drafts")
-    .withIndex("by_run", (q) => q.eq("crawlRunId", crawlRunId))
+    .withIndex("by_city", (q) => q.eq("cityId", cityId))
     .collect();
+  const dismissedNames = new Set(cityDrafts.filter((row) => row.status === "dismissed").map((row) => canonicalName(row.name)));
+  const rows = cityDrafts.filter((row) => row.crawlRunId === crawlRunId);
   const pendingByName = new Map<string, { id: Id<"drafts">; draft: DraftInput; documentId?: Id<"documents"> }>();
   for (const row of rows) {
     if (row.status !== "pending") continue;
@@ -57,6 +59,7 @@ export async function insertDrafts(
       tracked += 1;
       continue;
     }
+    if (dismissedNames.has(key)) continue;
     const existing = pendingByName.get(key);
     if (existing) {
       const combined = mergeDrafts(existing.draft, draft);

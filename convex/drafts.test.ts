@@ -95,6 +95,22 @@ describe("recordExtraction", () => {
   });
 });
 
+describe("insertDrafts and earlier dismissals", () => {
+  it("does not bring back a name the clerk dismissed in an earlier run", async () => {
+    const t = convexTest(schema, modules);
+    const cityId = await t.run(async (ctx) => ctx.db.insert("cities", { name: "Testville", domain: "testville.gov", slug: "testville", websiteUrl: "https://testville.gov", status: "confirmed" }));
+    const runRow = { cityId, purpose: "bootstrap" as const, source: "csv" as const, status: "review" as const, startedAt: 0, pageCount: 0, documentCount: 0, draftCount: 0, log: [] };
+    const firstRun = await t.run(async (ctx) => ctx.db.insert("crawlRuns", runRow));
+    await t.run(async (ctx) => ctx.db.insert("drafts", { cityId, crawlRunId: firstRun, name: "Other Local Boards", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://testville.gov/b", status: "dismissed" }));
+    const secondRun = await t.run(async (ctx) => ctx.db.insert("crawlRuns", runRow));
+    const draft = { name: "Other Local Boards", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://testville.gov/b" };
+    const result = await t.run(async (ctx) => insertDrafts(ctx, { cityId, crawlRunId: secondRun, drafts: [draft, { ...draft, name: "Library Board" }] }));
+    expect(result.draftCount).toBe(1);
+    const pending = await t.run(async (ctx) => (await ctx.db.query("drafts").withIndex("by_run", (q) => q.eq("crawlRunId", secondRun)).collect()).map((row) => row.name));
+    expect(pending).toEqual(["Library Board"]);
+  });
+});
+
 describe("demo desk", () => {
   it("can read drafts but every write is refused with the read-only line", async () => {
     const t = convexTest(schema, modules);

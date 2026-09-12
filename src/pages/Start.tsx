@@ -111,6 +111,10 @@ function hostOf(url: string) {
 
 function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<typeof api.bootstrap.status>>> }) {
   const { run, documents, drafts, namedDrafts, city } = status;
+  const me = useQuery(api.users.me);
+  const someoneElses = !!city?.createdBy && !!me && city.createdBy !== me._id;
+  const walled = documents.filter((d) => (d.error ?? "").includes("bot check")).length;
+  const scraped = documents.filter((d) => d.contentType === "text/markdown").length;
   const stepIndex = STEPS.findIndex((s) => s.key.includes(run.status));
   return (
     <div className="stack" style={{ gap: 20 }}>
@@ -136,7 +140,8 @@ function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<ty
         <div className="card card-pad row between">
           <div>
             <div className="display display-md">{drafts} draft {drafts === 1 ? "body" : "bodies"} ready to review</div>
-            <p className="muted">{draftSummary(drafts, namedDrafts)} Each draft shows the sentence every name and date came from. Confirm them one by one from the clerk desk.</p>
+            <p className="muted">{draftSummary(drafts, namedDrafts)} Each draft shows the sentence every name and date came from. {someoneElses ? "Another visitor started this city today, so the desk shows it read-only until it is cleared." : "Confirm them one by one from the clerk desk."}</p>
+            {walled > 0 && <p className="muted small">The city's site answers automated reading with a bot check. {scraped} {scraped === 1 ? "page was" : "pages were"} read through Firecrawl instead; {walled} {walled === 1 ? "was" : "were"} not read.</p>}
           </div>
           <div className="row">
             <Link to={city ? `/clerk/review?city=${city._id}` : "/clerk/review"} className="btn">Review drafts</Link>
