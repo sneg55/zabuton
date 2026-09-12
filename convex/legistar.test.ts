@@ -20,10 +20,15 @@ const records = officeRecordsFixture as LegistarOfficeRecord[];
 describe("selectBodies", () => {
   it("keeps active bodies whose name reads like a board", () => {
     expect(selectBodies(bodies).map((b) => b.BodyName)).toEqual([
-      "City Council",
       "City Planning Commission",
       "Zoning Board of Appeals",
     ]);
+  });
+  it("drops the council itself and council committees by Legistar body type", () => {
+    const names = selectBodies(bodies).map((b) => b.BodyName);
+    expect(names).not.toContain("City Council");
+    expect(bodies.some((b) => b.BodyTypeName === "Council Committee" && b.BodyActiveFlag === 1)).toBe(true);
+    expect(selectBodies(bodies).some((b) => b.BodyTypeName === "Council Committee")).toBe(false);
   });
   it("drops inactive bodies even when the name matches", () => {
     expect(selectBodies(bodies).some((b) => b.BodyName === "Canvassers, Board of")).toBe(false);

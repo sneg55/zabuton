@@ -118,7 +118,7 @@ describe("drafts.confirm", () => {
     expect(board?.seats[0].term?.rawStart).toBe("8/24");
     expect(board?.seats[0].term?.current).toBe(true);
     expect(board?.seats[1].term?.endsAt).toBeUndefined();
-    expect(board?.seats[2].status).toBe("vacant");
+    expect(board?.seats[2].status).toBe("unlisted");
     const pending = await t.query(api.drafts.list, { cityId });
     expect(pending).toHaveLength(0);
   });

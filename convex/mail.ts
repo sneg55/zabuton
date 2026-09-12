@@ -77,6 +77,11 @@ export const status = action({
   handler: async () => ({ configured: Boolean(process.env.AGENTMAIL_API_KEY) }),
 });
 
+export const isConfigured = query({
+  args: {},
+  handler: async () => Boolean(process.env.AGENTMAIL_API_KEY),
+});
+
 export const threadMessages = query({
   args: { threadId: v.id("threads") },
   handler: async (ctx, { threadId }) => {

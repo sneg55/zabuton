@@ -94,6 +94,7 @@ export default defineSchema({
     bodyId: v.id("bodies"),
     ordinal: v.number(),
     label: v.optional(v.string()),
+    vacant: v.optional(v.boolean()),
   }).index("by_body", ["bodyId"]),
   members: defineTable({
     cityId: v.id("cities"),

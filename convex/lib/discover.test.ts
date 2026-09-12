@@ -53,11 +53,29 @@ describe("legistarClientGuesses", () => {
 });
 
 describe("candidate URLs", () => {
-  it("keeps board, commission and PDF paths and drops the rest", () => {
+  it("keeps board, commission and roster paths and drops the rest", () => {
     expect(isCandidateUrl("https://dublin.ca.gov/74/Boards-Commissions")).toBe(true);
     expect(isCandidateUrl("https://dublin.ca.gov/DocumentCenter/View/36214/Maddy-Act")).toBe(true);
     expect(isCandidateUrl("https://dublin.ca.gov/files/roster.pdf")).toBe(true);
     expect(isCandidateUrl("https://dublin.ca.gov/parks/pool-hours")).toBe(false);
+  });
+  it("needs a keyword in the path or the title for a PDF, and drops known junk", () => {
+    expect(isCandidateUrl("https://x.gov/DocumentCenter/View/1/file.pdf")).toBe(false);
+    expect(isCandidateUrl("https://x.gov/DocumentCenter/View/1/file.pdf", "[PDF] NOTICE OF COMMISSION VACANCIES")).toBe(true);
+    expect(isCandidateUrl("https://x.gov/DocumentCenter/View/2/file.pdf", "[PDF] STANDARD SPECIFICATIONS AND DETAILS")).toBe(false);
+    expect(isCandidateUrl("https://x.gov/committee/budget-2026.pdf")).toBe(false);
+    expect(isCandidateUrl("https://x.gov/boards/agenda.pdf")).toBe(false);
+  });
+  it("ranks path matches ahead of title-only matches before capping", () => {
+    const links = [
+      { url: "https://x.gov/DocumentCenter/View/9/a.pdf", title: "[PDF] volunteer for a city commission" },
+      { url: "https://x.gov/boards-commissions" },
+      { url: "https://x.gov/DocumentCenter/View/8/b.pdf", title: "[PDF] local appointments list" },
+    ];
+    expect(filterCandidateUrls(links, 2).map((l) => l.url)).toEqual([
+      "https://x.gov/boards-commissions",
+      "https://x.gov/DocumentCenter/View/9/a.pdf",
+    ]);
   });
   it("dedupes, skips relative links and caps the list", () => {
     const links = [

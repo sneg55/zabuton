@@ -86,6 +86,16 @@ export function isGenericBodyName(name: string): boolean {
   return false;
 }
 
+const ROLE_TAIL = /\b(term|\d{2}-\d{2}|\d{4})\b/i;
+
+export function cleanRole(role: string | null): string | null {
+  if (role === null) return null;
+  let value = role.replace(/\s+/g, " ").trim().replace(/[.;:,]+$/, "").trim();
+  const comma = value.indexOf(",");
+  if (comma > 0 && ROLE_TAIL.test(value.slice(comma))) value = value.slice(0, comma).trim();
+  return value === "" ? null : value;
+}
+
 export type Evidence = "members_dated" | "members" | "seats" | "rules";
 
 export function draftEvidence(draft: { members: Array<{ termEnd: string | null }>; seatCount: number | null; termLength: string | null; termLimit: string | null }): Evidence {

@@ -256,11 +256,27 @@ export async function resolveFlag(
     }
     if (term && flag.field === "member_missing") {
       await ctx.db.patch(term._id, { current: false });
+      await ctx.db.patch(flag.seatId, { vacant: true });
     }
   }
   await ctx.db.patch(flagId, { status: "resolved", resolvedAt: Date.now() });
   return null;
 }
+
+export const resolveMany = mutation({
+  args: { flagIds: v.array(v.id("driftFlags")), action: v.union(v.literal("accept_published"), v.literal("keep_tracked")) },
+  handler: async (ctx, { flagIds, action }) => {
+    await requireClerk(ctx);
+    let resolved = 0;
+    for (const flagId of flagIds) {
+      const flag = await ctx.db.get(flagId);
+      if (!flag || flag.status === "resolved") continue;
+      await resolveFlag(ctx, flagId, action);
+      resolved += 1;
+    }
+    return resolved;
+  },
+});
 
 export const resolve = mutation({
   args: { flagId: v.id("driftFlags"), action: v.union(v.literal("accept_published"), v.literal("keep_tracked")) },

@@ -13,6 +13,14 @@ export const me = query({
   },
 });
 
+export const clerkExists = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    return users.some((user) => user.role === "clerk");
+  },
+});
+
 export async function requireClerk(ctx: QueryCtx | MutationCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw new ConvexError("Sign in required");

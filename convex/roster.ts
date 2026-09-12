@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { DEFAULT_EXPIRING_DAYS, seatStatus, type SeatStatus } from "./lib/seatStatus";
+import { DEFAULT_EXPIRING_DAYS, isVacancyName, seatStatus, type Occupancy, type SeatStatus } from "./lib/seatStatus";
 
 export type SeatRow = {
   seat: Doc<"seats">;
@@ -12,7 +12,12 @@ export type SeatRow = {
 
 export type StatusCounts = Record<SeatStatus, number>;
 
-const emptyCounts = (): StatusCounts => ({ vacant: 0, expired: 0, expiring: 0, active: 0 });
+const emptyCounts = (): StatusCounts => ({ vacant: 0, expired: 0, expiring: 0, active: 0, unlisted: 0 });
+
+function occupancyOf(seat: Doc<"seats">, term: Doc<"terms"> | null, member: Doc<"members"> | null): Occupancy {
+  if (term && member) return isVacancyName(member.name) ? "vacant" : "held";
+  return seat.vacant ? "vacant" : "unlisted";
+}
 
 async function seatRows(ctx: QueryCtx, body: Doc<"bodies">, now: number): Promise<SeatRow[]> {
   const threshold = body.expiringDays ?? DEFAULT_EXPIRING_DAYS;
@@ -29,7 +34,8 @@ async function seatRows(ctx: QueryCtx, body: Doc<"bodies">, now: number): Promis
       .collect();
     const term = terms.find((t) => t.current) ?? null;
     const member = term ? await ctx.db.get(term.memberId) : null;
-    rows.push({ seat, term, member, status: seatStatus(term?.endsAt ?? null, now, threshold) });
+    const occupancy = occupancyOf(seat, term, member);
+    rows.push({ seat, term: occupancy === "held" ? term : null, member: occupancy === "held" ? member : null, status: seatStatus(term?.endsAt ?? null, now, threshold, occupancy) });
   }
   return rows;
 }
@@ -92,10 +98,10 @@ export const openings = query({
     const out: Array<{ body: Doc<"bodies">; row: SeatRow }> = [];
     for (const body of bodies) {
       for (const row of await seatRows(ctx, body, at)) {
-        if (row.status !== "active") out.push({ body, row });
+        if (row.status !== "active" && row.status !== "unlisted") out.push({ body, row });
       }
     }
-    const rank: Record<SeatStatus, number> = { vacant: 0, expired: 1, expiring: 2, active: 3 };
+    const rank: Record<SeatStatus, number> = { vacant: 0, expired: 1, expiring: 2, active: 3, unlisted: 4 };
     out.sort((a, b) => rank[a.row.status] - rank[b.row.status] || a.body.name.localeCompare(b.body.name));
     return out;
   },

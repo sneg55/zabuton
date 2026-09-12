@@ -80,9 +80,16 @@ export const bootstrapWorkflow = workflow.define({
           message: `Fetching ${discovered.candidates} documents`,
         });
         const candidates = await step.runQuery(internal.crawl.runDocuments, { crawlRunId });
-        await Promise.all(
+        const fetches = await Promise.allSettled(
           candidates.map((candidate) => step.runAction(internal.crawl.fetchDocument, { documentId: candidate.documentId })),
         );
+        const fetchFailures = fetches.filter((result) => result.status === "rejected").length;
+        if (fetchFailures > 0) {
+          await step.runMutation(internal.crawl.setRunStatus, {
+            crawlRunId,
+            message: `${fetchFailures} documents could not be read and were skipped`,
+          });
+        }
         const fetched = await step.runQuery(internal.crawl.runDocuments, { crawlRunId });
         const readable = fetched.filter((document) => document.fetched);
         await step.runMutation(internal.crawl.setRunStatus, {
@@ -90,9 +97,16 @@ export const bootstrapWorkflow = workflow.define({
           status: "extracting",
           message: `Classifying and extracting ${readable.length} documents`,
         });
-        await Promise.all(
+        const extractions = await Promise.allSettled(
           readable.map((document) => step.runAction(internal.extract.processDocument, { documentId: document.documentId })),
         );
+        const extractFailures = extractions.filter((result) => result.status === "rejected").length;
+        if (extractFailures > 0) {
+          await step.runMutation(internal.crawl.setRunStatus, {
+            crawlRunId,
+            message: `${extractFailures} documents could not be extracted and were skipped`,
+          });
+        }
       }
       await step.runMutation(internal.crawl.finishRun, { crawlRunId });
     } catch (error) {

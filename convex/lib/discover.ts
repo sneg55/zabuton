@@ -62,34 +62,74 @@ export const CANDIDATE_KEYWORDS = [
 
 export const CANDIDATE_URL_CAP = 40;
 
-export function isCandidateUrl(url: string): boolean {
-  let path: string;
+export const JUNK_KEYWORDS = [
+  "specification",
+  "budget",
+  "capital improvement",
+  "water management",
+  "action plan",
+  "initial study",
+  "negative declaration",
+  "environmental impact",
+  "speech",
+  "state of the city",
+  "prioritization",
+  "executive summary",
+  "design guideline",
+  "impediments",
+  "appendices",
+  "memo template",
+  "agenda",
+  "minutes",
+  "staff report",
+  "police department",
+  "fire department",
+  "strategic plan",
+  "general plan",
+  "housing element",
+  "financial report",
+  "audit report",
+];
+
+function pathOf(url: string): string {
   try {
     const parsed = new URL(url);
-    path = `${parsed.pathname}${parsed.search}`.toLowerCase();
+    return `${parsed.pathname}${parsed.search}`.toLowerCase();
   } catch {
-    path = url.toLowerCase();
+    return url.toLowerCase();
   }
-  if (path.includes(".pdf")) return true;
-  return CANDIDATE_KEYWORDS.some((keyword) => path.includes(keyword));
+}
+
+export function candidateScore(url: string, title?: string): number {
+  const path = pathOf(url);
+  const heading = (title ?? "").toLowerCase();
+  if (JUNK_KEYWORDS.some((keyword) => path.includes(keyword) || heading.includes(keyword))) return 0;
+  if (CANDIDATE_KEYWORDS.some((keyword) => path.includes(keyword))) return 2;
+  if (CANDIDATE_KEYWORDS.some((keyword) => heading.includes(keyword))) return 1;
+  return 0;
+}
+
+export function isCandidateUrl(url: string, title?: string): boolean {
+  return candidateScore(url, title) > 0;
 }
 
 export type CandidateLink = { url: string; title?: string };
 
 export function filterCandidateUrls(links: CandidateLink[], cap: number = CANDIDATE_URL_CAP): CandidateLink[] {
   const seen = new Set<string>();
-  const kept: CandidateLink[] = [];
-  for (const link of links) {
-    if (typeof link.url !== "string" || link.url === "") continue;
-    if (!HTTP_SCHEME.test(link.url)) continue;
-    if (!isCandidateUrl(link.url)) continue;
+  const scored: Array<{ link: CandidateLink; score: number; order: number }> = [];
+  links.forEach((link, order) => {
+    if (typeof link.url !== "string" || link.url === "") return;
+    if (!HTTP_SCHEME.test(link.url)) return;
+    const score = candidateScore(link.url, link.title);
+    if (score === 0) return;
     const key = link.url.replace(/#.*$/, "").replace(/\/$/, "");
-    if (seen.has(key)) continue;
+    if (seen.has(key)) return;
     seen.add(key);
-    kept.push({ url: link.url, title: link.title });
-    if (kept.length >= cap) break;
-  }
-  return kept;
+    scored.push({ link: { url: link.url, title: link.title }, score, order });
+  });
+  scored.sort((a, b) => b.score - a.score || a.order - b.order);
+  return scored.slice(0, cap).map((row) => row.link);
 }
 
 export const BOOTSTRAP_RUN_CAP = 30;

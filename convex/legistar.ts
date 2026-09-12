@@ -28,6 +28,8 @@ export type LegistarOfficeRecord = {
 
 export const BODY_NAME_KEYWORDS = ["commission", "board", "committee", "authority", "council", "task force"];
 
+export const EXCLUDED_BODY_TYPES = /council committee|primary legislative body|services area|city clerk/i;
+
 export function bodiesUrl(client: string): string {
   return `${LEGISTAR_ORIGIN}/v1/${client}/Bodies`;
 }
@@ -64,6 +66,7 @@ export function oneYearAgoIso(now: number): string {
 export function selectBodies(bodies: LegistarBody[]): LegistarBody[] {
   return bodies.filter((body) => {
     if (body.BodyActiveFlag !== 1) return false;
+    if (EXCLUDED_BODY_TYPES.test(body.BodyTypeName ?? "")) return false;
     const name = (body.BodyName ?? "").toLowerCase();
     return BODY_NAME_KEYWORDS.some((keyword) => name.includes(keyword));
   });

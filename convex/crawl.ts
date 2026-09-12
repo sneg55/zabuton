@@ -13,7 +13,7 @@ import {
   titleFromUrl,
 } from "./lib/discover";
 import type { DraftInput } from "./lib/draftTypes";
-import { fetchWithBrowserUa } from "./lib/httpFetch";
+import { TooLargeError, fetchWithBrowserUa } from "./lib/httpFetch";
 import {
   bodyToDraft,
   fetchOfficeRecords,
@@ -264,6 +264,10 @@ export const fetchDocument = internalAction({
       return true;
     } catch (error) {
       const plain = error instanceof Error ? error.message : String(error);
+      if (error instanceof TooLargeError) {
+        await ctx.runMutation(internal.crawl.recordFetchError, { documentId, error: plain });
+        return false;
+      }
       const allowed = await ctx.runMutation(internal.crawl.claimScrape, { documentId });
       if (!allowed) {
         await ctx.runMutation(internal.crawl.recordFetchError, {

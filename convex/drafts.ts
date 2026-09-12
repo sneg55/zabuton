@@ -1,7 +1,8 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
-import { canonicalName, isGenericBodyName, mergeDrafts, type DraftInput } from "./lib/draftTypes";
+import { canonicalName, cleanRole, isGenericBodyName, mergeDrafts, type DraftInput } from "./lib/draftTypes";
+import { isVacancyName } from "./lib/seatStatus";
 import { normalizeTermEnd } from "./lib/termDates";
 import { draftMemberValidator, draftStatusValidator } from "./schema";
 import { requireClerk } from "./users";
@@ -48,7 +49,8 @@ export async function insertDrafts(
     if (row.status !== "pending") continue;
     pendingByName.set(canonicalName(row.name), { id: row._id, draft: row as DraftInput, documentId: row.documentId });
   }
-  for (const draft of drafts) {
+  for (const raw of drafts) {
+    const draft: DraftInput = { ...raw, members: raw.members.map((member) => ({ ...member, role: cleanRole(member.role) })) };
     if (isGenericBodyName(draft.name)) continue;
     const key = canonicalName(draft.name);
     if (trackedNames.has(key)) {
@@ -92,6 +94,35 @@ export const recordExtraction = internalMutation({
     drafts: v.array(draftInputValidator),
   },
   handler: async (ctx, args) => insertDrafts(ctx, args),
+});
+
+export function invalidTermEnds(members: DraftInput["members"]): string[] {
+  return members.filter((member) => member.termEnd !== null && member.termEnd.trim() !== "" && normalizeTermEnd(member.termEnd) === null).map((member) => member.termEnd as string);
+}
+
+export const saveEdits = mutation({
+  args: {
+    draftId: v.id("drafts"),
+    edits: v.object({
+      name: v.optional(v.string()),
+      termLength: v.optional(v.union(v.string(), v.null())),
+      termLimit: v.optional(v.union(v.string(), v.null())),
+      members: v.optional(v.array(draftMemberValidator)),
+    }),
+  },
+  handler: async (ctx, { draftId, edits }) => {
+    await requireClerk(ctx);
+    const draft = await ctx.db.get(draftId);
+    if (!draft) throw new ConvexError("That draft is gone");
+    if (draft.status !== "pending") throw new ConvexError("Only pending drafts can be edited");
+    await ctx.db.patch(draftId, {
+      ...(edits.name === undefined ? {} : { name: edits.name }),
+      ...(edits.termLength === undefined ? {} : { termLength: edits.termLength }),
+      ...(edits.termLimit === undefined ? {} : { termLimit: edits.termLimit }),
+      ...(edits.members === undefined ? {} : { members: edits.members }),
+    });
+    return null;
+  },
 });
 
 export const dismissMany = mutation({
@@ -143,7 +174,10 @@ export async function confirmDraft(
   if (!draft) throw new ConvexError("That draft is gone");
   if (draft.status === "confirmed") throw new ConvexError("That draft is already confirmed");
   const name = edits?.name ?? draft.name;
+  if (name.trim() === "") throw new ConvexError("A body needs a name");
   const members = edits?.members ?? draft.members;
+  const bad = invalidTermEnds(members);
+  if (bad.length > 0) throw new ConvexError(`Not a date: ${bad.join(", ")}. Use a month and year, or leave it blank.`);
   const seatCount = edits?.seatCount === undefined ? draft.seatCount : edits.seatCount;
   const bodyId = await ctx.db.insert("bodies", {
     cityId: draft.cityId,
@@ -158,8 +192,13 @@ export async function confirmDraft(
   let ordinal = 0;
   for (const member of members) {
     ordinal += 1;
-    const memberId = await ctx.db.insert("members", { cityId: draft.cityId, name: member.name });
-    const seatId = await ctx.db.insert("seats", { bodyId, ordinal, label: member.role ?? undefined });
+    const label = cleanRole(member.role) ?? undefined;
+    if (isVacancyName(member.name)) {
+      await ctx.db.insert("seats", { bodyId, ordinal, label, vacant: true });
+      continue;
+    }
+    const memberId = await ctx.db.insert("members", { cityId: draft.cityId, name: member.name.trim() });
+    const seatId = await ctx.db.insert("seats", { bodyId, ordinal, label });
     await ctx.db.insert("terms", {
       seatId,
       memberId,
