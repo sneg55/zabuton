@@ -200,10 +200,15 @@ describe("overRunCap", () => {
     const old = Array.from({ length: 40 }, () => now - 2 * day);
     expect(overRunCap(old, now)).toBe(false);
   });
-  it("refuses at 30 runs in the window and allows 29", () => {
-    const recent = Array.from({ length: 29 }, (_, i) => now - i * 60_000);
+  it("refuses at 200 runs in the window and allows 199", () => {
+    const recent = Array.from({ length: 199 }, (_, i) => now - i * 60_000);
     expect(overRunCap(recent, now)).toBe(false);
     expect(overRunCap([...recent, now - 1000], now)).toBe(true);
+  });
+  it("takes a smaller per-city cap", () => {
+    const recent = [now - 1000, now - 2000, now - 3000];
+    expect(overRunCap(recent.slice(0, 2), now, 3)).toBe(false);
+    expect(overRunCap(recent, now, 3)).toBe(true);
   });
 });
 

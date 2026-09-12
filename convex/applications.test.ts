@@ -63,6 +63,23 @@ describe("applications.submit", () => {
     expect(detail?.events[1].note).toBe("email not configured");
   });
 
+  it("caps one email at 3 applications a day and a city at 50", async () => {
+    const t = newTest();
+    const fixture = await seedCity(t);
+    await submitOne(t, fixture.seatId);
+    await submitOne(t, fixture.seatId);
+    await submitOne(t, fixture.seatId);
+    await expect(submitOne(t, fixture.seatId)).rejects.toThrow(/already sent 3/);
+    await t.run(async (ctx) => {
+      for (let i = 0; i < 47; i += 1) {
+        await ctx.db.insert("applications", { cityId: fixture.cityId, applicantName: `R${i}`, email: `r${i}@example.org`, statement: "x", state: "received", updatedAt: Date.now() });
+      }
+    });
+    await expect(
+      t.mutation(api.applications.submit, { citySlug: "dublin", applicantName: "Zed", email: "zed@example.org", statement: "I would like to serve on this commission." }),
+    ).rejects.toThrow(/as many applications/);
+  });
+
   it("rejects an unknown city and a malformed email", async () => {
     const t = newTest();
     await seedCity(t);

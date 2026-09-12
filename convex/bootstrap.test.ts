@@ -57,13 +57,23 @@ describe("createBootstrapRun", () => {
     await expect(startRun(t, "dublin.ca.gov")).resolves.toBeTruthy();
   });
 
-  it("refuses once 30 bootstrap runs have started in 24 hours", async () => {
+  it("refuses once 200 bootstrap runs have started in 24 hours", async () => {
     const t = convexTest(schema, modules);
-    for (let i = 0; i < 30; i += 1) {
+    for (let i = 0; i < 200; i += 1) {
       const run = await startRun(t, `city${i}.gov`, now - i * 1000);
       await t.run(async (ctx) => ctx.db.patch(run.crawlRunId, { status: "done" }));
     }
-    await expect(startRun(t, "onemore.gov")).rejects.toThrow(/30 crawls/);
+    await expect(startRun(t, "onemore.gov")).rejects.toThrow(/200 crawls/);
+  });
+
+  it("refuses a fourth crawl of the same city inside 24 hours", async () => {
+    const t = convexTest(schema, modules);
+    for (let i = 0; i < 3; i += 1) {
+      const run = await startRun(t, "same.gov", now - i * 1000);
+      await t.run(async (ctx) => ctx.db.patch(run.crawlRunId, { status: "failed" }));
+    }
+    await expect(startRun(t, "same.gov")).rejects.toThrow(/3 times/);
+    await expect(startRun(t, "other.gov")).resolves.toBeTruthy();
   });
 
   it("counts only the last 24 hours against the cap", async () => {

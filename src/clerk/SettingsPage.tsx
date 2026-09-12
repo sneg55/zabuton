@@ -2,7 +2,7 @@ import { useAction, useMutation } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { PageHead } from "../ui/PageHead";
-import { useCity } from "./Shell";
+import { READ_ONLY_HINT, useCity, useDesk } from "./Shell";
 import { errorText } from "../lib/errors";
 
 export function SettingsPage() {
@@ -11,6 +11,7 @@ export function SettingsPage() {
   const ensureInbox = useAction(api.mail.ensureInbox);
   const mailStatus = useAction(api.mail.status);
   const importCsv = useMutation(api.bootstrap.importCsv);
+  const { readOnly } = useDesk();
   const [name, setName] = useState(city.name);
   const [days, setDays] = useState(String(city.expiringDays ?? 120));
   const [configured, setConfigured] = useState<boolean | null>(null);
@@ -37,9 +38,9 @@ export function SettingsPage() {
           <label className="field"><span>Notice window, days before a term ends</span><input className="input" type="number" min={7} max={365} value={days} onChange={(e) => setDays(e.target.value)} /></label>
           <div className="row between">
             <span className="small muted">{city.status === "draft" ? "Still in setup: confirmed bodies already show on the public roster." : "Roster is published."}</span>
-            <button className="btn" type="submit">Save</button>
+            <button className="btn" type="submit" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined}>Save</button>
           </div>
-          {city.status === "draft" && <button type="button" className="btn btn-secondary" onClick={() => run(update({ cityId: city._id, status: "confirmed" }), "Marked as set up. Daily drift checks now cover this city.")}>Finish setup</button>}
+          {city.status === "draft" && <button type="button" className="btn btn-secondary" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => run(update({ cityId: city._id, status: "confirmed" }), "Marked as set up. Daily drift checks now cover this city.")}>Finish setup</button>}
         </form>
         <div className="card card-pad stack">
           <h2 className="display display-md">City inbox</h2>
@@ -50,7 +51,7 @@ export function SettingsPage() {
             <p className="muted">No inbox yet. One inbox per city; threads per applicant and per member.</p>
           )}
           {!city.inboxAddress && (
-            <button className="btn btn-secondary" disabled={configured === false} onClick={() => run(ensureInbox({ cityId: city._id }), "Inbox created.")}>Create the city inbox</button>
+            <button className="btn btn-secondary" disabled={configured === false || readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => run(ensureInbox({ cityId: city._id }), "Inbox created.")}>Create the city inbox</button>
           )}
         </div>
         <form className="card card-pad stack" style={{ gridColumn: "1 / -1" }} onSubmit={(e) => { e.preventDefault(); run(importCsv({ cityId: city._id, csv }).then(() => setCsv("")), "Imported. Review the drafts."); }}>
@@ -59,7 +60,7 @@ export function SettingsPage() {
           <textarea className="textarea" value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={"body,member,role,appointed,term_end,source_url\nPlanning Commission,Ada Lovelace,,12/24,12/28,https://city.gov/roster.pdf"} style={{ fontFamily: "ui-monospace, monospace", fontSize: "0.875rem" }} />
           <div className="row between">
             <span className="small muted">Dates keep the spreadsheet's format; month and year is enough.</span>
-            <button className="btn" type="submit" disabled={!csv.trim()}>Import as drafts</button>
+            <button className="btn" type="submit" disabled={!csv.trim() || readOnly} title={readOnly ? READ_ONLY_HINT : undefined}>Import as drafts</button>
           </div>
         </form>
       </div>

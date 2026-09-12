@@ -9,7 +9,7 @@ import { formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { PageSkeleton } from "../ui/Skeleton";
 import { SourceLink } from "../ui/SourceLink";
-import { useCity } from "./Shell";
+import { READ_ONLY_HINT, useCity, useDesk } from "./Shell";
 import { errorText } from "../lib/errors";
 
 const EVIDENCE_LABEL: Record<Evidence, string> = {
@@ -26,6 +26,7 @@ export function ReviewPage() {
   const drafts = useQuery(api.drafts.list, { cityId: city._id });
   const latest = useQuery(api.bootstrap.latestRun, { cityId: city._id, purpose: "bootstrap" });
   const dismissMany = useMutation(api.drafts.dismissMany);
+  const { readOnly } = useDesk();
   const [tab, setTab] = useState<Evidence | "all">("all");
   const [filter, setFilter] = useState("");
   const [open, setOpen] = useState<Id<"drafts"> | "none" | null>(null);
@@ -62,7 +63,7 @@ export function ReviewPage() {
           <div className="row">
             <input className="input" style={{ width: 220, height: 36 }} value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Find a body" aria-label="Find a body" />
             {tab !== "all" && shown.length > 0 && (
-              <button className="btn btn-quiet btn-sm" onClick={() => void dismissMany({ draftIds: shown.map((d) => d._id) })}>Dismiss all {shown.length} in this group</button>
+              <button className="btn btn-quiet btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void dismissMany({ draftIds: shown.map((d) => d._id) })}>Dismiss all {shown.length} in this group</button>
             )}
           </div>
         </div>
@@ -93,6 +94,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
   const confirm = useMutation(api.drafts.confirm);
   const dismiss = useMutation(api.drafts.dismiss);
   const saveEdits = useMutation(api.drafts.saveEdits);
+  const { readOnly } = useDesk();
   const [name, setName] = useState(draft.name);
   const [termLength, setTermLength] = useState(draft.termLength ?? "");
   const [termLimit, setTermLimit] = useState(draft.termLimit ?? "");
@@ -102,7 +104,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const dirty = useRef(false);
   useEffect(() => {
-    if (!dirty.current) return;
+    if (!dirty.current || readOnly) return;
     setSaveState("unsaved");
     const timer = window.setTimeout(() => {
       setSaveState("saving");
@@ -111,7 +113,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
         .catch(() => setSaveState("failed"));
     }, SAVE_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [name, termLength, termLimit, members, draft._id, saveEdits]);
+  }, [name, termLength, termLimit, members, draft._id, saveEdits, readOnly]);
   const edit = <T,>(set: (value: T) => void) => (value: T) => {
     dirty.current = true;
     set(value);
@@ -178,13 +180,14 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
         </div>
       )}
       <div className="row between" style={{ padding: "0 18px 16px" }}>
-        <button className="btn btn-quiet" onClick={() => void dismiss({ draftId: draft._id })}>Not a body, dismiss</button>
+        <button className="btn btn-quiet" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void dismiss({ draftId: draft._id })}>Not a body, dismiss</button>
         <div className="row">
           {error && <span className="error small">{error}</span>}
           {invalidDates > 0 && !error && <span className="small muted">Fix the dates marked in red before confirming.</span>}
           <button
             className="btn"
-            disabled={busy || invalidDates > 0 || name.trim() === ""}
+            disabled={busy || readOnly || invalidDates > 0 || name.trim() === ""}
+            title={readOnly ? READ_ONLY_HINT : undefined}
             onClick={() => {
               setBusy(true);
               setError(null);

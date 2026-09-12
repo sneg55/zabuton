@@ -1,5 +1,9 @@
 import { ConvexError, v } from "convex/values";
-import { internalMutation, type MutationCtx } from "./_generated/server";
+import { components, internal } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
+import { internalAction, internalMutation, internalQuery, type MutationCtx } from "./_generated/server";
+import { confirmDraft } from "./drafts";
+import { inboxDisplayName } from "./mail";
 import { cleanRole, isGenericBodyName } from "./lib/draftTypes";
 import { isVacancyName } from "./lib/seatStatus";
 
@@ -220,6 +224,70 @@ export const cleanSeatLabels = internalMutation({
       const cleaned = cleanRole(seat.label);
       if (cleaned === seat.label) continue;
       await ctx.db.patch(seat._id, { label: cleaned ?? undefined });
+      n += 1;
+    }
+    return n;
+  },
+});
+
+export const dismissDraftsMatching = internalMutation({
+  args: { slug: v.string(), pattern: v.string() },
+  handler: async (ctx, { slug, pattern }) => {
+    const city = await cityBySlug(ctx, slug);
+    const re = new RegExp(pattern, "i");
+    const names: string[] = [];
+    for (const draft of await ctx.db.query("drafts").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()) {
+      if (draft.status !== "pending" || !re.test(draft.name)) continue;
+      await ctx.db.patch(draft._id, { status: "dismissed" });
+      names.push(draft.name);
+    }
+    return names;
+  },
+});
+
+export const confirmPendingDrafts = internalMutation({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const city = await cityBySlug(ctx, slug);
+    const names: string[] = [];
+    for (const draft of await ctx.db.query("drafts").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()) {
+      if (draft.status !== "pending") continue;
+      await confirmDraft(ctx, draft._id);
+      names.push(draft.name);
+    }
+    await ctx.db.patch(city._id, { status: "confirmed" });
+    return names;
+  },
+});
+
+export const createCityInbox = internalAction({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }): Promise<{ inboxId: string; address: string | undefined }> => {
+    const city: Doc<"cities"> | null = await ctx.runQuery(internal.dev.cityBySlugQuery, { slug });
+    if (!city) throw new ConvexError("no city " + slug);
+    if (city.inboxId) return { inboxId: city.inboxId, address: city.inboxAddress };
+    const inbox = (await ctx.runAction(components.agentmail.lib.createInbox, {
+      request: { username: city.slug, display_name: inboxDisplayName(city.name) },
+    })) as { inbox_id?: string; email?: string } | null;
+    if (!inbox?.inbox_id) throw new ConvexError("AgentMail did not return an inbox");
+    await ctx.runMutation(internal.mailStore.saveInbox, { cityId: city._id, inboxId: inbox.inbox_id, address: inbox.email ?? inbox.inbox_id });
+    return { inboxId: inbox.inbox_id, address: inbox.email ?? inbox.inbox_id };
+  },
+});
+
+export const cityBySlugQuery = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }): Promise<Doc<"cities"> | null> => ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique(),
+});
+
+export const setApplicationEmail = internalMutation({
+  args: { slug: v.string(), from: v.string(), to: v.string() },
+  handler: async (ctx, { slug, from, to }) => {
+    const city = await cityBySlug(ctx, slug);
+    let n = 0;
+    for (const app of await ctx.db.query("applications").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()) {
+      if (app.email !== from) continue;
+      await ctx.db.patch(app._id, { email: to });
       n += 1;
     }
     return n;

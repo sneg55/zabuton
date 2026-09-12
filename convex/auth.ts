@@ -9,7 +9,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       if (existingUserId) return;
       const user = await ctx.db.get(userId);
       if (user?.isAnonymous) {
-        await ctx.db.patch(userId, { role: "clerk", name: "Demo clerk" });
+        await ctx.db.patch(userId, { role: "demo", name: "Demo clerk" });
         return;
       }
       const clerks = await ctx.db.query("users").filter((q) => q.eq(q.field("role"), "clerk")).take(1);

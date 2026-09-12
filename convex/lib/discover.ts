@@ -132,7 +132,8 @@ export function filterCandidateUrls(links: CandidateLink[], cap: number = CANDID
   return scored.slice(0, cap).map((row) => row.link);
 }
 
-export const BOOTSTRAP_RUN_CAP = 30;
+export const BOOTSTRAP_RUN_CAP = 200;
+export const CITY_RUN_CAP = 3;
 export const BOOTSTRAP_RUN_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export function overRunCap(startedAts: number[], now: number, cap: number = BOOTSTRAP_RUN_CAP): boolean {

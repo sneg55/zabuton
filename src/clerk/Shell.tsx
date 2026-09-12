@@ -8,9 +8,16 @@ import { SignIn } from "../SignIn";
 import { SiteFrame, Wordmark } from "../ui/Site";
 import { ShellSkeleton } from "../ui/Skeleton";
 
-type ShellContext = { city: Doc<"cities"> };
+type ShellContext = { city: Doc<"cities">; readOnly: boolean };
+
+export const READ_ONLY_HINT = "The demo desk is read-only. Sign in as the clerk to change things.";
+
+export function useDesk() {
+  return useOutletContext<ShellContext>();
+}
 
 const CITY_KEY = "zabuton.clerk.city";
+const DEFAULT_CITY_SLUG = "dublin-ca";
 
 function readStoredCity(): string | null {
   try {
@@ -61,8 +68,10 @@ function ShellInner() {
     if (cityId) writeStoredCity(cityId);
   }, [cityId]);
   if (cities === undefined || me === undefined) return <ShellSkeleton />;
-  const city = cities.find((c) => c._id === cityId) ?? cities.find((c) => c.status === "confirmed") ?? cities[0];
-  if (me && me.role !== "clerk") {
+  const ordered = [...cities].sort((a, b) => Number(b.status === "confirmed") - Number(a.status === "confirmed") || a.name.localeCompare(b.name));
+  const city = ordered.find((c) => c._id === cityId) ?? ordered.find((c) => c.slug === DEFAULT_CITY_SLUG) ?? ordered[0];
+  const readOnly = me?.role === "demo";
+  if (me && me.role !== "clerk" && me.role !== "demo") {
     return (
       <SiteFrame>
         <section className="hero">
@@ -95,7 +104,7 @@ function ShellInner() {
         <div className="rail-city">
           {cities.length > 1 ? (
             <select className="select" value={city._id} onChange={(e) => setCityId(e.target.value)}>
-              {cities.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+              {ordered.map((c) => <option key={c._id} value={c._id}>{c.name}{c.status === "confirmed" ? "" : " (in setup)"}</option>)}
             </select>
           ) : (
             <strong>{city.name}</strong>
@@ -112,12 +121,19 @@ function ShellInner() {
         </nav>
         <div className="rail-foot">
           <Link to={`/c/${city.slug}`}>Public roster</Link>
+          <Link to={`/c/${city.slug}/appointments`}>Appointments list</Link>
           <span>{me?.email ?? me?.name ?? "Demo clerk"}</span>
           <button className="btn btn-quiet btn-sm" style={{ justifySelf: "start" }} onClick={() => void signOut()}>Sign out</button>
         </div>
       </aside>
       <main>
-        <Outlet context={{ city } satisfies ShellContext} />
+        {readOnly && (
+          <div className="demo-banner">
+            <span>Demo desk: everything is visible, nothing saves. Sign in as the clerk to change things.</span>
+            <button className="btn btn-secondary btn-sm" onClick={() => void signOut()}>Sign in as the clerk</button>
+          </div>
+        )}
+        <Outlet context={{ city, readOnly } satisfies ShellContext} />
       </main>
     </div>
   );

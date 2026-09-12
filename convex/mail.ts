@@ -16,6 +16,10 @@ const RECONCILE_MAX_ATTEMPTS = 3;
 const APPLICATION_LABELS = ["application"];
 const NOTICE_LABELS = ["notice"];
 
+export function inboxDisplayName(cityName: string): string {
+  return `${cityName.replace(/[^A-Za-z0-9 .'-]/g, "").replace(/\s+/g, " ").trim()} City Clerk`;
+}
+
 function mailCtx<T>(ctx: ActionCtx): T {
   return ctx as unknown as T;
 }
@@ -102,7 +106,7 @@ export const ensureInbox = action({
     if (city.inboxId) return { inboxId: city.inboxId, address: city.inboxAddress ?? city.inboxId };
     const inbox = (await agentMail.createInbox(mailCtx(ctx), {
       username: city.slug,
-      displayName: `${city.name} City Clerk`,
+      displayName: inboxDisplayName(city.name),
     })) as { inbox_id?: string; email?: string } | null;
     const inboxId = inbox?.inbox_id;
     if (!inboxId) throw new ConvexError("AgentMail did not return an inbox");

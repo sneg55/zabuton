@@ -6,6 +6,7 @@ import { NoticesPage } from "./clerk/NoticesPage";
 import { ReviewPage } from "./clerk/ReviewPage";
 import { SettingsPage } from "./clerk/SettingsPage";
 import { ClerkShell } from "./clerk/Shell";
+import { Appointments } from "./pages/Appointments";
 import { Apply } from "./pages/Apply";
 import { Landing } from "./pages/Landing";
 import { Openings, PublicCity } from "./pages/PublicCity";
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/c/:slug" element={<PublicCity />} />
         <Route path="/c/:slug/openings" element={<Openings />} />
         <Route path="/c/:slug/apply" element={<Apply />} />
+        <Route path="/c/:slug/appointments" element={<Appointments />} />
         <Route path="/clerk" element={<ClerkShell />}>
           <Route index element={<BoardPage />} />
           <Route path="review" element={<ReviewPage />} />

@@ -5,7 +5,7 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { PageSkeleton, Skeleton } from "../ui/Skeleton";
-import { useCity } from "./Shell";
+import { READ_ONLY_HINT, useCity, useDesk } from "./Shell";
 import { errorText } from "../lib/errors";
 
 type State = Doc<"applications">["state"];
@@ -64,6 +64,7 @@ function ApplicationDetail({ id, onClose }: { id: Id<"applications">; onClose: (
   const data = useQuery(api.applications.get, { applicationId: id });
   const draftReply = useAction(api.applications.draftReply);
   const setState = useMutation(api.applications.setState);
+  const { readOnly } = useDesk();
   const [target, setTarget] = useState<State | null>(null);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
@@ -97,6 +98,8 @@ function ApplicationDetail({ id, onClose }: { id: Id<"applications">; onClose: (
               <button
                 key={s}
                 className={`btn btn-sm ${target === s ? "" : "btn-secondary"}`}
+                disabled={readOnly}
+                title={readOnly ? READ_ONLY_HINT : undefined}
                 onClick={() => {
                   setTarget(s);
                   setReply("");

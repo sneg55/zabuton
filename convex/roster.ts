@@ -107,4 +107,22 @@ export const openings = query({
   },
 });
 
+export const appointments = query({
+  args: { cityId: v.id("cities"), now: v.optional(v.number()) },
+  handler: async (ctx, { cityId, now }) => {
+    const at = now ?? Date.now();
+    const bodies = await ctx.db
+      .query("bodies")
+      .withIndex("by_city", (q) => q.eq("cityId", cityId))
+      .collect();
+    bodies.sort((a, b) => a.name.localeCompare(b.name));
+    const out: Array<{ body: Doc<"bodies">; seats: SeatRow[] }> = [];
+    for (const body of bodies) {
+      if (!body.confirmed) continue;
+      out.push({ body, seats: await seatRows(ctx, body, at) });
+    }
+    return out;
+  },
+});
+
 export type CityId = Id<"cities">;

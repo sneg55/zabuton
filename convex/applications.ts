@@ -58,6 +58,10 @@ async function lastEventOf(ctx: QueryCtx, applicationId: Id<"applications">) {
     .first();
 }
 
+export const APPLICATION_CITY_CAP = 50;
+export const APPLICATION_EMAIL_CAP = 3;
+export const APPLICATION_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 export const submit = mutation({
   args: {
     citySlug: v.string(),
@@ -82,6 +86,15 @@ export const submit = mutation({
     const seat = args.seatId ? await ctx.db.get(args.seatId) : null;
     const bodyId = args.bodyId ?? seat?.bodyId;
     const now = Date.now();
+    const recent = (await ctx.db.query("applications").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()).filter(
+      (row) => row._creationTime >= now - APPLICATION_WINDOW_MS,
+    );
+    if (recent.length >= APPLICATION_CITY_CAP) {
+      throw new ConvexError(`${city.name} has received as many applications as it accepts in a day. Try again tomorrow.`);
+    }
+    if (recent.filter((row) => row.email.toLowerCase() === email.toLowerCase()).length >= APPLICATION_EMAIL_CAP) {
+      throw new ConvexError(`That email address has already sent ${APPLICATION_EMAIL_CAP} applications today.`);
+    }
     const applicationId = await ctx.db.insert("applications", {
       cityId: city._id,
       bodyId,

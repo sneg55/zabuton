@@ -5,7 +5,7 @@ import { formatDateTime, formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { PageSkeleton } from "../ui/Skeleton";
 import { SourceLink } from "../ui/SourceLink";
-import { useCity } from "./Shell";
+import { READ_ONLY_HINT, useCity, useDesk } from "./Shell";
 import { errorText } from "../lib/errors";
 
 const FIELD_LABEL: Record<string, string> = {
@@ -21,6 +21,7 @@ export function DriftPage() {
   const runNow = useMutation(api.drift.runNow);
   const resolve = useMutation(api.drift.resolve);
   const resolveMany = useMutation(api.drift.resolveMany);
+  const { readOnly } = useDesk();
   const [error, setError] = useState<string | null>(null);
   const running = latest && !["review", "done", "failed"].includes(latest.status);
   if (!flags) return <PageSkeleton rows={3} />;
@@ -32,7 +33,7 @@ export function DriftPage() {
         actions={
           <div className="row">
             {latest && <span className="small muted">Last check {formatDateTime(latest.finishedAt ?? latest.startedAt)}{running ? ", running" : latest.status === "failed" ? ", failed" : ""}</span>}
-            <button className="btn btn-secondary" disabled={!!running} onClick={() => { setError(null); runNow({ cityId: city._id }).catch((e: unknown) => setError(errorText(e))); }}>
+            <button className="btn btn-secondary" disabled={!!running || readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => { setError(null); runNow({ cityId: city._id }).catch((e: unknown) => setError(errorText(e))); }}>
               Check the city site now
             </button>
           </div>
@@ -45,8 +46,8 @@ export function DriftPage() {
         <div className="row between card card-pad">
           <span>{flags.length} differences waiting. Resolve them one by one below, or all at once.</span>
           <div className="row">
-            <button className="btn btn-sm" onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "accept_published" })}>Update all {flags.length} to the city page</button>
-            <button className="btn btn-secondary btn-sm" onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "keep_tracked" })}>Keep all as tracked</button>
+            <button className="btn btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "accept_published" })}>Update all {flags.length} to the city page</button>
+            <button className="btn btn-secondary btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "keep_tracked" })}>Keep all as tracked</button>
           </div>
         </div>
       )}
@@ -66,8 +67,8 @@ export function DriftPage() {
             </div>
             {f.snippet && <span className="provenance"><q>{f.snippet}</q></span>}
             <div className="row">
-              <button className="btn btn-sm" onClick={() => void resolve({ flagId: f._id, action: "accept_published" })}>Update to what the city page says</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => void resolve({ flagId: f._id, action: "keep_tracked" })}>Keep what is tracked</button>
+              <button className="btn btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void resolve({ flagId: f._id, action: "accept_published" })}>Update to what the city page says</button>
+              <button className="btn btn-secondary btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void resolve({ flagId: f._id, action: "keep_tracked" })}>Keep what is tracked</button>
             </div>
           </div>
         ))}

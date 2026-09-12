@@ -7,7 +7,12 @@ import { defineApp } from "convex/server";
 const app = defineApp();
 app.use(staticHosting);
 app.use(firecrawl, { env: { FIRECRAWL_API_KEY: process.env.FIRECRAWL_API_KEY! } });
-app.use(agentmail);
+app.use(agentmail, {
+  env: {
+    AGENTMAIL_API_KEY: process.env.AGENTMAIL_API_KEY!,
+    AGENTMAIL_WEBHOOK_SECRET: process.env.AGENTMAIL_WEBHOOK_SECRET,
+  },
+});
 app.use(workflow);
 
 export default app;

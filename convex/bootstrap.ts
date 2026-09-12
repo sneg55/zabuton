@@ -5,7 +5,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
 import { insertDrafts } from "./drafts";
 import { csvToDrafts } from "./lib/csv";
-import { IN_PROGRESS_STATUSES, normalizeCityUrl, overRunCap } from "./lib/discover";
+import { BOOTSTRAP_RUN_CAP, CITY_RUN_CAP, IN_PROGRESS_STATUSES, normalizeCityUrl, overRunCap } from "./lib/discover";
 import { requireClerk } from "./users";
 import { workflow } from "./workflow";
 
@@ -39,7 +39,7 @@ export async function createBootstrapRun(ctx: MutationCtx, url: string, now: num
     .filter((q) => q.eq(q.field("purpose"), "bootstrap"))
     .collect();
   if (overRunCap(bootstrapRuns.map((run) => run.startedAt), now)) {
-    throw new ConvexError("Zabuton has started 30 crawls in the last 24 hours. Try again later.");
+    throw new ConvexError(`Zabuton has started ${BOOTSTRAP_RUN_CAP} crawls in the last 24 hours. Try again later.`);
   }
   const city = await ensureCity(ctx, url);
   const cityRuns = await ctx.db
@@ -48,6 +48,10 @@ export async function createBootstrapRun(ctx: MutationCtx, url: string, now: num
     .collect();
   const running = cityRuns.find((run) => IN_PROGRESS_STATUSES.includes(run.status as (typeof IN_PROGRESS_STATUSES)[number]));
   if (running) throw new ConvexError(`A crawl of ${city.name} is already running`);
+  const cityBootstraps = cityRuns.filter((run) => run.purpose === "bootstrap").map((run) => run.startedAt);
+  if (overRunCap(cityBootstraps, now, CITY_RUN_CAP)) {
+    throw new ConvexError(`${city.name} has been crawled ${CITY_RUN_CAP} times in the last 24 hours. Try again tomorrow, or import a spreadsheet from the clerk desk.`);
+  }
   const crawlRunId = await ctx.db.insert("crawlRuns", {
     cityId: city._id,
     purpose: "bootstrap",

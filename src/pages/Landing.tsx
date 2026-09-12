@@ -89,7 +89,7 @@ export function Landing() {
           </div>
           <div className="feature">
             <h3>Annual appointments list, one query away</h3>
-            <p>California's Maddy Act list and similar annual notices are a report over data you already keep, not a December project.</p>
+            <p>California's Maddy Act list and similar annual notices are one page over data you already keep: every seat, holder and term end, with a CSV to attach. Not a December project.</p>
           </div>
         </div>
       </section>

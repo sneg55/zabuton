@@ -7,7 +7,7 @@ import { formatDate, formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
 import { PageSkeleton } from "../ui/Skeleton";
 import { StatusPill } from "../ui/StatusPill";
-import { useCity } from "./Shell";
+import { READ_ONLY_HINT, useCity, useDesk } from "./Shell";
 import { errorText } from "../lib/errors";
 
 const KIND_LABEL: Record<Doc<"notices">["kind"], string> = { term_expiry: "Term expiry", reappointment: "Reappointment" };
@@ -22,6 +22,7 @@ export function NoticesPage() {
   const approve = useMutation(api.notices.approve);
   const discard = useMutation(api.notices.discard);
   const setEmail = useMutation(api.members.setEmail);
+  const { readOnly } = useDesk();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   if (!notices || !openings) return <PageSkeleton rows={6} table />;
@@ -54,7 +55,7 @@ export function NoticesPage() {
                     <td>{body.name}</td>
                     <td>{row.member!.name}</td>
                     <td>
-                      <EmailCell member={row.member!} onSave={(email) => setEmail({ memberId: row.member!._id, email })} />
+                      <EmailCell member={row.member!} readOnly={readOnly} onSave={(email) => setEmail({ memberId: row.member!._id, email })} />
                     </td>
                     <td className="num">{formatDate(row.term?.endsAt, row.term?.rawEnd)}</td>
                     <td><StatusPill status={row.status} /></td>
@@ -67,7 +68,8 @@ export function NoticesPage() {
                             <button
                               key={kind}
                               className="btn btn-secondary btn-sm"
-                              disabled={busy === row.seat._id + kind}
+                              disabled={readOnly || busy === row.seat._id + kind}
+                              title={readOnly ? READ_ONLY_HINT : undefined}
                               onClick={() => {
                                 setBusy(row.seat._id + kind);
                                 setError(null);
@@ -98,10 +100,11 @@ export function NoticesPage() {
                   <div className="small muted">To {n.memberName} ({n.memberEmail ?? "no email on file"}), {n.bodyName}. {KIND_LABEL[n.kind]}.</div>
                 </div>
                 <div className="row">
-                  <button className="btn btn-quiet btn-sm" onClick={() => void discard({ noticeId: n._id })}>Discard</button>
+                  <button className="btn btn-quiet btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => void discard({ noticeId: n._id })}>Discard</button>
                   <button
                     className="btn btn-sm"
-                    disabled={busy === n._id}
+                    disabled={readOnly || busy === n._id}
+                    title={readOnly ? READ_ONLY_HINT : undefined}
                     onClick={() => {
                       setBusy(n._id);
                       setError(null);
@@ -141,9 +144,10 @@ export function NoticesPage() {
   );
 }
 
-function EmailCell({ member, onSave }: { member: Doc<"members">; onSave: (email: string) => Promise<unknown> }) {
+function EmailCell({ member, onSave, readOnly }: { member: Doc<"members">; onSave: (email: string) => Promise<unknown>; readOnly: boolean }) {
   const [value, setValue] = useState(member.email ?? "");
   const [editing, setEditing] = useState(!member.email);
+  if (readOnly) return <span className="small muted">{member.email ?? "No email on file"}</span>;
   if (!editing) return <span className="small">{member.email} <button className="btn btn-quiet btn-sm" onClick={() => setEditing(true)}>Edit</button></span>;
   return (
     <form className="row" style={{ gap: 6 }} onSubmit={(e) => { e.preventDefault(); void onSave(value).then(() => setEditing(false)); }}>

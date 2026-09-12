@@ -2,7 +2,7 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const roleValidator = v.union(v.literal("clerk"), v.literal("applicant"));
+export const roleValidator = v.union(v.literal("clerk"), v.literal("applicant"), v.literal("demo"));
 
 export const crawlStatusValidator = v.union(
   v.literal("queued"),

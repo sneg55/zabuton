@@ -1,0 +1,185 @@
+diff --git a/node_modules/@agentmail/convex/dist/component/convex.config.js b/node_modules/@agentmail/convex/dist/component/convex.config.js
+index 3d15ed6..0d5873d 100644
+--- a/node_modules/@agentmail/convex/dist/component/convex.config.js
++++ b/node_modules/@agentmail/convex/dist/component/convex.config.js
+@@ -1,7 +1,13 @@
+ import { defineComponent } from "convex/server";
++import { v } from "convex/values";
+ import workpool from "@convex-dev/workpool/convex.config";
+-const component = defineComponent("agentmail");
++const component = defineComponent("agentmail", {
++    env: {
++        AGENTMAIL_API_KEY: v.string(),
++        AGENTMAIL_WEBHOOK_SECRET: v.optional(v.string()),
++        AGENTMAIL_BASE_URL: v.optional(v.string()),
++    },
++});
+ component.use(workpool, { name: "sendPool" });
+ component.use(workpool, { name: "callbackPool" });
+ export default component;
+-//# sourceMappingURL=convex.config.js.map
+\ No newline at end of file
+diff --git a/node_modules/@agentmail/convex/dist/component/lib.d.ts b/node_modules/@agentmail/convex/dist/component/lib.d.ts
+index 2db242a..07101e7 100644
+--- a/node_modules/@agentmail/convex/dist/component/lib.d.ts
++++ b/node_modules/@agentmail/convex/dist/component/lib.d.ts
+@@ -1,4 +1,4 @@
+-export declare const createInbox: import("convex/server").RegisteredAction<"internal", {
++export declare const createInbox: import("convex/server").RegisteredAction<"public", {
+     request: {
+         domain?: string | undefined;
+         username?: string | undefined;
+@@ -6,15 +6,15 @@ export declare const createInbox: import("convex/server").RegisteredAction<"inte
+         client_id?: string | undefined;
+     };
+ }, Promise<InboxResponse>>;
+-export declare const listInboxes: import("convex/server").RegisteredAction<"internal", {
++export declare const listInboxes: import("convex/server").RegisteredAction<"public", {
+     limit?: number | undefined;
+     page_token?: string | undefined;
+     ascending?: boolean | undefined;
+ }, Promise<unknown>>;
+-export declare const getInboxRemote: import("convex/server").RegisteredAction<"internal", {
++export declare const getInboxRemote: import("convex/server").RegisteredAction<"public", {
+     inboxId: string;
+ }, Promise<InboxResponse>>;
+-export declare const deleteInbox: import("convex/server").RegisteredAction<"internal", {
++export declare const deleteInbox: import("convex/server").RegisteredAction<"public", {
+     inboxId: string;
+ }, Promise<null>>;
+ type InboxResponse = {
+@@ -26,10 +26,10 @@ type InboxResponse = {
+     created_at: string;
+     updated_at: string;
+ };
+-export declare const upsertInbox: import("convex/server").RegisteredMutation<"internal", {
++export declare const upsertInbox: import("convex/server").RegisteredMutation<"public", {
+     inbox: any;
+ }, Promise<void>>;
+-export declare const removeInbox: import("convex/server").RegisteredMutation<"internal", {
++export declare const removeInbox: import("convex/server").RegisteredMutation<"public", {
+     inboxId: string;
+ }, Promise<void>>;
+ export declare const listCachedInboxes: import("convex/server").RegisteredQuery<"public", {}, Promise<{
+@@ -91,7 +91,7 @@ export declare const enqueueSend: import("convex/server").RegisteredMutation<"pu
+ export declare const cancelSend: import("convex/server").RegisteredMutation<"public", {
+     outboundId: import("convex/values").GenericId<"outboundMessages">;
+ }, Promise<void>>;
+-export declare const getOutboundForSend: import("convex/server").RegisteredQuery<"internal", {
++export declare const getOutboundForSend: import("convex/server").RegisteredQuery<"public", {
+     outboundId: import("convex/values").GenericId<"outboundMessages">;
+ }, Promise<{
+     _id: import("convex/values").GenericId<"outboundMessages">;
+@@ -106,14 +106,14 @@ export declare const getOutboundForSend: import("convex/server").RegisteredQuery
+     payload: any;
+     kind: "send" | "reply" | "reply_all" | "forward";
+ } | null>>;
+-export declare const performSend: import("convex/server").RegisteredAction<"internal", {
++export declare const performSend: import("convex/server").RegisteredAction<"public", {
+     outboundId: import("convex/values").GenericId<"outboundMessages">;
+ }, Promise<{
+     agentmailMessageId: string;
+     threadId: string;
+ } | null>>;
+-export declare const onSendComplete: import("convex/server").RegisteredMutation<"internal", import("@convex-dev/workpool").OnCompleteArgs, null>;
+-export declare const markSendFailed: import("convex/server").RegisteredMutation<"internal", {
++export declare const onSendComplete: import("convex/server").RegisteredMutation<"public", import("@convex-dev/workpool").OnCompleteArgs, null>;
++export declare const markSendFailed: import("convex/server").RegisteredMutation<"public", {
+     errorMessage: string;
+     outboundId: import("convex/values").GenericId<"outboundMessages">;
+ }, Promise<void>>;
+@@ -125,7 +125,7 @@ export declare const getOutboundStatus: import("convex/server").RegisteredQuery<
+     threadId: string | null;
+     errorMessage: string | null;
+ } | null>>;
+-export declare const listThreads: import("convex/server").RegisteredAction<"internal", {
++export declare const listThreads: import("convex/server").RegisteredAction<"public", {
+     labels?: string[] | undefined;
+     limit?: number | undefined;
+     page_token?: string | undefined;
+@@ -133,11 +133,11 @@ export declare const listThreads: import("convex/server").RegisteredAction<"inte
+     after?: string | undefined;
+     inboxId: string;
+ }, Promise<unknown>>;
+-export declare const getThread: import("convex/server").RegisteredAction<"internal", {
++export declare const getThread: import("convex/server").RegisteredAction<"public", {
+     inboxId: string;
+     threadId: string;
+ }, Promise<unknown>>;
+-export declare const getMessage: import("convex/server").RegisteredAction<"internal", {
++export declare const getMessage: import("convex/server").RegisteredAction<"public", {
+     inboxId: string;
+     messageId: string;
+ }, Promise<unknown>>;
+diff --git a/node_modules/@agentmail/convex/dist/component/lib.js b/node_modules/@agentmail/convex/dist/component/lib.js
+index c245802..341ba22 100644
+--- a/node_modules/@agentmail/convex/dist/component/lib.js
++++ b/node_modules/@agentmail/convex/dist/component/lib.js
+@@ -1,5 +1,5 @@
+ import { v } from "convex/values";
+-import { internalAction, internalMutation, internalQuery, mutation, query, } from "./_generated/server.js";
++import { action, internalAction, internalMutation, internalQuery, mutation, query, } from "./_generated/server.js";
+ import { components, internal } from "./_generated/api.js";
+ import { Workpool } from "@convex-dev/workpool";
+ import { vRuntimeConfig, vSendKind, vSendPayload, } from "./shared.js";
+@@ -17,7 +17,7 @@ const callbackPool = new Workpool(components.callbackPool, {
+ // ---------------------------------------------------------------------------
+ // Inboxes
+ // ---------------------------------------------------------------------------
+-export const createInbox = internalAction({
++export const createInbox = action({
+     args: {
+         request: v.object({
+             username: v.optional(v.string()),
+@@ -35,7 +35,7 @@ export const createInbox = internalAction({
+         return inbox;
+     },
+ });
+-export const listInboxes = internalAction({
++export const listInboxes = action({
+     args: {
+         limit: v.optional(v.number()),
+         page_token: v.optional(v.string()),
+@@ -52,7 +52,7 @@ export const listInboxes = internalAction({
+         });
+     },
+ });
+-export const getInboxRemote = internalAction({
++export const getInboxRemote = action({
+     args: { inboxId: v.string() },
+     handler: async (ctx, args) => {
+         const inbox = (await agentmailFetch(`/inboxes/${args.inboxId}`, {
+@@ -62,7 +62,7 @@ export const getInboxRemote = internalAction({
+         return inbox;
+     },
+ });
+-export const deleteInbox = internalAction({
++export const deleteInbox = action({
+     args: { inboxId: v.string() },
+     handler: async (ctx, args) => {
+         await agentmailFetch(`/inboxes/${args.inboxId}`, {
+@@ -310,7 +310,7 @@ export const getOutboundStatus = query({
+ // ---------------------------------------------------------------------------
+ // Threads / messages: thin wrappers over remote API
+ // ---------------------------------------------------------------------------
+-export const listThreads = internalAction({
++export const listThreads = action({
+     args: {
+         inboxId: v.string(),
+         limit: v.optional(v.number()),
+@@ -332,13 +332,13 @@ export const listThreads = internalAction({
+         });
+     },
+ });
+-export const getThread = internalAction({
++export const getThread = action({
+     args: { inboxId: v.string(), threadId: v.string() },
+     handler: async (_ctx, args) => {
+         return await agentmailFetch(`/inboxes/${args.inboxId}/threads/${args.threadId}`, { method: "GET" });
+     },
+ });
+-export const getMessage = internalAction({
++export const getMessage = action({
+     args: { inboxId: v.string(), messageId: v.string() },
+     handler: async (_ctx, args) => {
+         return await agentmailFetch(`/inboxes/${args.inboxId}/messages/${args.messageId}`, { method: "GET" });

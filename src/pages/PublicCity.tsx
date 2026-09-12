@@ -38,6 +38,7 @@ export function PublicCity() {
           <p className="lede">Current members and terms, read from the city's published rosters. Open and expiring seats accept applications.</p>
           <div className="row">
             <Link to={`/c/${city.slug}/openings`} className="btn">See open seats and apply</Link>
+            <Link to={`/c/${city.slug}/appointments`} className="btn btn-secondary">Annual appointments list</Link>
             <a className="btn btn-secondary" href={city.websiteUrl} target="_blank" rel="noreferrer">City website</a>
           </div>
         </div>
