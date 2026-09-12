@@ -8,11 +8,12 @@ import { StatusPill } from "./ui/StatusPill";
 import { TermBar } from "./ui/TermBar";
 import { SourceLink } from "./ui/SourceLink";
 import { parseRawStart } from "./lib/format";
+import { PageSkeleton, TableSkeleton } from "./ui/Skeleton";
 
 export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
   const rows = useQuery(api.roster.city, { cityId: city._id });
   const [open, setOpen] = useState<Id<"bodies"> | null>(null);
-  if (rows === undefined) return null;
+  if (rows === undefined) return <PageSkeleton rows={6} />;
   const totals = rows.reduce(
     (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active, unlisted: acc.unlisted + r.counts.unlisted }),
     { expired: 0, expiring: 0, vacant: 0, active: 0, unlisted: 0 },
@@ -59,7 +60,7 @@ export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
 
 function BodySeats({ bodyId }: { bodyId: Id<"bodies"> }) {
   const data = useQuery(api.roster.board, { bodyId });
-  if (!data) return null;
+  if (!data) return <div className="body-card-body"><TableSkeleton rows={4} cols={6} /></div>;
   return (
     <div className="body-card-body">
       <div className="table-wrap" style={{ border: 0 }}>

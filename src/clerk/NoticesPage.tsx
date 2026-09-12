@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDate, formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { PageSkeleton } from "../ui/Skeleton";
 import { StatusPill } from "../ui/StatusPill";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
@@ -23,7 +24,7 @@ export function NoticesPage() {
   const setEmail = useMutation(api.members.setEmail);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  if (!notices || !openings) return null;
+  if (!notices || !openings) return <PageSkeleton rows={6} table />;
   const now = Date.now();
   const held = openings.filter((o) => o.row.member && o.row.status !== "vacant" && o.row.status !== "unlisted");
   const stale = held.filter((o) => o.row.term?.endsAt !== undefined && o.row.term.endsAt < now - STALE_DAYS * DAY);

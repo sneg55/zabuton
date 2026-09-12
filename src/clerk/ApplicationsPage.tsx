@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { PageSkeleton, Skeleton } from "../ui/Skeleton";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
 
@@ -29,7 +30,7 @@ export function ApplicationsPage() {
   const city = useCity();
   const list = useQuery(api.applications.list, { cityId: city._id });
   const [openId, setOpenId] = useState<Id<"applications"> | null>(null);
-  if (list === undefined) return null;
+  if (list === undefined) return <PageSkeleton rows={5} table />;
   const open = list.find((a) => a._id === openId) ?? null;
   return (
     <div className="page">
@@ -67,7 +68,16 @@ function ApplicationDetail({ id, onClose }: { id: Id<"applications">; onClose: (
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="card card-pad stack" style={{ gap: 18 }} aria-busy="true">
+        <Skeleton w={200} h={24} />
+        <Skeleton w={320} h={12} />
+        <Skeleton w="100%" h={72} style={{ borderRadius: 12 }} />
+        <div className="row"><Skeleton w={110} h={32} style={{ borderRadius: 999 }} /><Skeleton w={90} h={32} style={{ borderRadius: 999 }} /></div>
+      </div>
+    );
+  }
   const { application, body, seat, events, messages } = data;
   return (
     <div className="card card-pad stack" style={{ gap: 18 }}>

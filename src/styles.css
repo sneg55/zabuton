@@ -268,6 +268,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .diff > div { padding: 12px 14px; border-radius: var(--radius); background: var(--fog); }
 .diff .label { font-size: 0.75rem; color: var(--ink-3); margin-bottom: 4px; }
 .signin { display: grid; gap: 14px; max-width: 380px; }
+.sk { display: block; border-radius: 6px; background: linear-gradient(90deg, var(--fog) 0%, #e6eaf1 45%, var(--fog) 90%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; max-width: 100%; }
+.sk-card { padding: 16px 18px; display: grid; gap: 10px; }
+.sk-table { display: grid; }
+.sk-row { display: grid; gap: 14px; padding: 12px 14px; border-bottom: 1px solid var(--fog); align-items: center; }
+.sk-row:last-child { border-bottom: 0; }
+.sk-head { padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 .demo-card { max-width: 380px; background: var(--wash); border-color: transparent; }
 .provenance { font-size: 0.8125rem; color: var(--ink-3); overflow-wrap: anywhere; }
 .provenance q { font-style: italic; }

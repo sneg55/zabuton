@@ -7,6 +7,7 @@ import { formatDate, pluralize } from "../lib/format";
 import { Nameplate } from "../ui/Nameplate";
 import { Empty } from "../ui/PageHead";
 import { SiteFrame } from "../ui/Site";
+import { PublicSkeleton, SeatGridSkeleton, TableSkeleton } from "../ui/Skeleton";
 import { SourceLink } from "../ui/SourceLink";
 import { StatusPill } from "../ui/StatusPill";
 
@@ -26,7 +27,7 @@ export function PublicCity() {
   const { slug = "" } = useParams();
   const city = useQuery(api.roster.cityBySlug, { slug });
   const rows = useQuery(api.roster.city, city ? { cityId: city._id } : "skip");
-  if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === undefined) return <SiteFrame><PublicSkeleton /></SiteFrame>;
   if (city === null) return <CityNotFound />;
   const bodies = rows ?? [];
   return (
@@ -80,11 +81,15 @@ function PublicBody({ body, counts, slug }: { body: Doc<"bodies">; counts: Recor
         {countOnly ? (
           <p className="muted">The city lists {pluralize(total, "seat")} for this body but does not publish who holds them or when the terms end.</p>
         ) : (
-          <div className="dais-seats">
-            {(data?.seats ?? []).map(({ seat, member, term, status }) => (
-              <Nameplate key={seat._id} seat={seat} member={member} term={term} status={status} />
-            ))}
-          </div>
+          data ? (
+            <div className="dais-seats">
+              {data.seats.map(({ seat, member, term, status }) => (
+                <Nameplate key={seat._id} seat={seat} member={member} term={term} status={status} />
+              ))}
+            </div>
+          ) : (
+            <SeatGridSkeleton count={Math.max(total, 3)} />
+          )
         )}
         <div className="row between">
           <span className="provenance">
@@ -101,7 +106,7 @@ export function Openings() {
   const { slug = "" } = useParams();
   const city = useQuery(api.roster.cityBySlug, { slug });
   const openings = useQuery(api.roster.openings, city ? { cityId: city._id } : "skip");
-  if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === undefined) return <SiteFrame><PublicSkeleton /></SiteFrame>;
   if (city === null) return <CityNotFound />;
   return (
     <SiteFrame>
@@ -117,7 +122,8 @@ export function Openings() {
           </div>
         </div>
       </section>
-      <div className="table-wrap" style={{ marginBottom: 48 }}>
+      {openings === undefined && <div style={{ marginBottom: 48 }}><TableSkeleton rows={6} cols={6} /></div>}
+      {openings !== undefined && <div className="table-wrap" style={{ marginBottom: 48 }}>
         <table className="table">
           <thead>
             <tr><th>Body</th><th>Seat</th><th>Current member</th><th>Term ends</th><th>Status</th><th></th></tr>
@@ -138,7 +144,7 @@ export function Openings() {
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
     </SiteFrame>
   );
 }

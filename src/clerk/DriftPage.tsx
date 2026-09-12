@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { formatDateTime, formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { PageSkeleton } from "../ui/Skeleton";
 import { SourceLink } from "../ui/SourceLink";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
@@ -22,7 +23,7 @@ export function DriftPage() {
   const resolveMany = useMutation(api.drift.resolveMany);
   const [error, setError] = useState<string | null>(null);
   const running = latest && !["review", "done", "failed"].includes(latest.status);
-  if (!flags) return null;
+  if (!flags) return <PageSkeleton rows={3} />;
   return (
     <div className="page">
       <PageHead

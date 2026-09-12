@@ -7,6 +7,7 @@ import { draftEvidence, type Evidence } from "../../convex/lib/draftTypes";
 import { normalizeTermEnd } from "../../convex/lib/termDates";
 import { formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { PageSkeleton } from "../ui/Skeleton";
 import { SourceLink } from "../ui/SourceLink";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
@@ -28,7 +29,7 @@ export function ReviewPage() {
   const [tab, setTab] = useState<Evidence | "all">("all");
   const [filter, setFilter] = useState("");
   const [open, setOpen] = useState<Id<"drafts"> | "none" | null>(null);
-  if (drafts === undefined) return null;
+  if (drafts === undefined) return <PageSkeleton rows={6} />;
   const byEvidence = new Map<Evidence, typeof drafts>();
   for (const d of drafts) {
     const e = draftEvidence(d);

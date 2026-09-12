@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { SiteFrame } from "../ui/Site";
 import { CityNotFound } from "./PublicCity";
+import { PublicSkeleton } from "../ui/Skeleton";
 
 export function Apply() {
   const { slug = "" } = useParams();
@@ -19,7 +20,7 @@ export function Apply() {
   const seatId = params.get("seat");
   const mailOn = useQuery(api.mail.isConfigured);
   const board = useQuery(api.roster.board, seatId && bodyId ? { bodyId: bodyId as Id<"bodies"> } : "skip");
-  if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === undefined) return <SiteFrame><PublicSkeleton /></SiteFrame>;
   if (city === null) return <CityNotFound />;
   const chosen = rows?.find((r) => r.body._id === bodyId);
   const seat = board?.seats.find((row) => row.seat._id === seatId);

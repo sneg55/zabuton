@@ -6,6 +6,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { SignIn } from "../SignIn";
 import { SiteFrame, Wordmark } from "../ui/Site";
+import { ShellSkeleton } from "../ui/Skeleton";
 
 type ShellContext = { city: Doc<"cities"> };
 
@@ -34,7 +35,7 @@ export function useCity() {
 export function ClerkShell() {
   return (
     <>
-      <AuthLoading><div className="site"><div className="hero" /></div></AuthLoading>
+      <AuthLoading><ShellSkeleton /></AuthLoading>
       <Unauthenticated>
         <SiteFrame>
           <section className="hero">
@@ -59,7 +60,7 @@ function ShellInner() {
   useEffect(() => {
     if (cityId) writeStoredCity(cityId);
   }, [cityId]);
-  if (cities === undefined || me === undefined) return null;
+  if (cities === undefined || me === undefined) return <ShellSkeleton />;
   const city = cities.find((c) => c._id === cityId) ?? cities.find((c) => c.status === "confirmed") ?? cities[0];
   if (me && me.role !== "clerk") {
     return (

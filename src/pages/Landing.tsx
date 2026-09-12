@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Nameplate } from "../ui/Nameplate";
 import { SiteFrame } from "../ui/Site";
+import { SeatGridSkeleton, Skeleton } from "../ui/Skeleton";
 import { StatusPill } from "../ui/StatusPill";
 
 const EXAMPLE_BODIES = ["Planning Commission", "Parks and Community Services Commission", "Tri-Valley Accessible Advisory Committee"];
@@ -99,7 +100,14 @@ export function Landing() {
 function ExampleDais() {
   const city = useQuery(api.roster.cityBySlug, { slug: "dublin-ca" });
   const rows = useQuery(api.roster.city, city ? { cityId: city._id } : "skip");
-  if (!city || !rows) return <div className="dais" style={{ minHeight: 320 }} aria-hidden="true" />;
+  if (!city || !rows) {
+    return (
+      <div className="dais" aria-busy="true">
+        <div className="dais-head"><Skeleton w={300} h={22} /><Skeleton w={280} h={24} style={{ borderRadius: 999 }} /></div>
+        <div className="dais-body"><Skeleton w={220} h={16} /><SeatGridSkeleton count={8} /></div>
+      </div>
+    );
+  }
   const picked = rows.filter((r) => EXAMPLE_BODIES.includes(r.body.name));
   const totals = rows.reduce(
     (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active, unlisted: acc.unlisted + r.counts.unlisted }),
@@ -132,7 +140,7 @@ function ExampleDais() {
 
 function DaisBody({ bodyId, name }: { bodyId: Id<"bodies">; name: string }) {
   const data = useQuery(api.roster.board, { bodyId });
-  if (!data) return null;
+  if (!data) return <div className="dais-body"><h3>{name}</h3><SeatGridSkeleton count={6} /></div>;
   return (
     <div className="dais-body">
       <h3>{name}</h3>
