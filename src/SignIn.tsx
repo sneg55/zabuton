@@ -9,7 +9,29 @@ export function SignIn() {
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
   return (
+    <div className="stack" style={{ gap: 20 }}>
+    <div className="card card-pad stack demo-card">
+      <div>
+        <strong>Just looking?</strong>
+        <p className="small muted">Open the clerk desk as a demo clerk. No account needed; you can review drafts, handle applications and run a drift check on the sample cities.</p>
+      </div>
+      <div>
+        <button
+          type="button"
+          className="btn"
+          disabled={demoBusy}
+          onClick={() => {
+            setError(null);
+            setDemoBusy(true);
+            void signIn("anonymous").catch(() => setError("The demo desk could not open. Try again in a moment.")).finally(() => setDemoBusy(false));
+          }}
+        >
+          {demoBusy ? "Opening the demo desk" : "Open the demo clerk desk"}
+        </button>
+      </div>
+    </div>
     <form
       className="signin"
       onSubmit={(e) => {
@@ -40,5 +62,6 @@ export function SignIn() {
       {clerkExists === true && <p className="small muted">This deployment already has its clerk account. Ask the clerk's office for access.</p>}
       {error && <p className="error small">{error}</p>}
     </form>
+    </div>
   );
 }

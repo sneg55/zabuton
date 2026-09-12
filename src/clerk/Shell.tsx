@@ -111,7 +111,7 @@ function ShellInner() {
         </nav>
         <div className="rail-foot">
           <Link to={`/c/${city.slug}`}>Public roster</Link>
-          <span>{me?.email}</span>
+          <span>{me?.email ?? me?.name ?? "Demo clerk"}</span>
           <button className="btn btn-quiet btn-sm" style={{ justifySelf: "start" }} onClick={() => void signOut()}>Sign out</button>
         </div>
       </aside>
