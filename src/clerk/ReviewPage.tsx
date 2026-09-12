@@ -124,10 +124,10 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
     <>
       <div className="body-card-head" style={{ cursor: "default", alignItems: "flex-start", paddingTop: 4 }}>
         <div className="stack" style={{ gap: 8, flex: 1, minWidth: 0 }}>
-          <input className="input draft-title" value={name} onChange={(e) => edit(setName)(e.target.value)} aria-label="Body name" />
+          <input className="input draft-title" value={name} readOnly={readOnly} onChange={(e) => edit(setName)(e.target.value)} aria-label="Body name" />
           <div className="row" style={{ gap: 8 }}>
-            <input className="input" value={termLength} onChange={(e) => edit(setTermLength)(e.target.value)} placeholder="Term length, e.g. four years" style={{ maxWidth: 240 }} aria-label="Term length" />
-            <input className="input" value={termLimit} onChange={(e) => edit(setTermLimit)(e.target.value)} placeholder="Term limit, e.g. two terms" style={{ maxWidth: 240 }} aria-label="Term limit" />
+            <input className="input" value={termLength} readOnly={readOnly} onChange={(e) => edit(setTermLength)(e.target.value)} placeholder="Term length, e.g. four years" style={{ maxWidth: 240 }} aria-label="Term length" />
+            <input className="input" value={termLimit} readOnly={readOnly} onChange={(e) => edit(setTermLimit)(e.target.value)} placeholder="Term limit, e.g. two terms" style={{ maxWidth: 240 }} aria-label="Term limit" />
             {draft.meetingCadence && <span className="small muted">{draft.meetingCadence}</span>}
           </div>
           <span className="provenance">
@@ -153,7 +153,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
                   const bad = Boolean(m.termEnd) && normalizeTermEnd(m.termEnd) === null;
                   return (
                     <tr key={i}>
-                      <td><input className="input" style={{ height: 32, minWidth: 140 }} value={m.name} onChange={(e) => edit(setMembers)(members.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} aria-label="Member name" /></td>
+                      <td><input className="input" style={{ height: 32, minWidth: 140 }} value={m.name} readOnly={readOnly} onChange={(e) => edit(setMembers)(members.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} aria-label="Member name" /></td>
                       <td className="muted">{m.role ?? ""}</td>
                       <td className="muted" style={{ whiteSpace: "nowrap" }}>{formatRawDate(m.appointed ?? undefined)}</td>
                       <td>
@@ -164,13 +164,14 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
                           placeholder="Unknown"
                           aria-label="Term end"
                           aria-invalid={bad}
+                          readOnly={readOnly}
                           title={bad ? "Not a date. Use a month and year, like 12/2026 or June 2026." : undefined}
                           onChange={(e) => edit(setMembers)(members.map((x, j) => (j === i ? { ...x, termEnd: e.target.value || null } : x)))}
                         />
                         {bad && <div className="small error">Not a date</div>}
                       </td>
                       <td className="provenance"><q>{m.snippet}</q>{m.confidence !== "grounded" && <span className="pill pill-expiring" style={{ marginLeft: 6 }}>{m.confidence}</span>}</td>
-                      <td><button className="btn btn-quiet btn-sm" onClick={() => edit(setMembers)(members.filter((_, j) => j !== i))}>Remove</button></td>
+                      <td><button className="btn btn-quiet btn-sm" disabled={readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => edit(setMembers)(members.filter((_, j) => j !== i))}>Remove</button></td>
                     </tr>
                   );
                 })}

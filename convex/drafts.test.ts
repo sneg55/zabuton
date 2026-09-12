@@ -95,6 +95,20 @@ describe("recordExtraction", () => {
   });
 });
 
+describe("demo desk", () => {
+  it("can read drafts but every write is refused with the read-only line", async () => {
+    const t = convexTest(schema, modules);
+    const cityId = await t.run(async (ctx) => ctx.db.insert("cities", { name: "Testville", domain: "testville.gov", slug: "testville", websiteUrl: "https://testville.gov", status: "confirmed" }));
+    const crawlRunId = await t.run(async (ctx) => ctx.db.insert("crawlRuns", { cityId, purpose: "bootstrap", source: "csv", status: "review", startedAt: 0, pageCount: 0, documentCount: 0, draftCount: 0, log: [] }));
+    const draftId = await t.run(async (ctx) => ctx.db.insert("drafts", { cityId, crawlRunId, name: "Library Board", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://testville.gov/lib", status: "pending" }));
+    const demoId = await t.run(async (ctx) => ctx.db.insert("users", { name: "Demo clerk", role: "demo", isAnonymous: true }));
+    const demo = t.withIdentity({ subject: demoId });
+    expect(await demo.query(api.drafts.list, { cityId })).toHaveLength(1);
+    await expect(demo.mutation(api.drafts.dismiss, { draftId })).rejects.toThrow(/read-only/);
+    await expect(demo.mutation(api.drafts.saveEdits, { draftId, edits: { name: "x" } })).rejects.toThrow(/read-only/);
+  });
+});
+
 describe("drafts.confirm", () => {
   async function pendingDraft(t: Harness) {
     const { cityId, crawlRunId } = await seedRun(t);
