@@ -100,12 +100,22 @@ function pathOf(url: string): string {
   }
 }
 
+export function hasKeywordAtWordStart(text: string, keyword: string): boolean {
+  let from = 0;
+  for (;;) {
+    const at = text.indexOf(keyword, from);
+    if (at < 0) return false;
+    if (at === 0 || !/[a-z]/.test(text[at - 1])) return true;
+    from = at + 1;
+  }
+}
+
 export function candidateScore(url: string, title?: string): number {
   const path = pathOf(url);
   const heading = (title ?? "").toLowerCase();
   if (JUNK_KEYWORDS.some((keyword) => path.includes(keyword) || heading.includes(keyword))) return 0;
-  if (CANDIDATE_KEYWORDS.some((keyword) => path.includes(keyword))) return 2;
-  if (CANDIDATE_KEYWORDS.some((keyword) => heading.includes(keyword))) return 1;
+  if (CANDIDATE_KEYWORDS.some((keyword) => hasKeywordAtWordStart(path, keyword))) return 2;
+  if (CANDIDATE_KEYWORDS.some((keyword) => hasKeywordAtWordStart(heading, keyword))) return 1;
   return 0;
 }
 

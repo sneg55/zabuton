@@ -176,7 +176,13 @@ export const status = query({
       .query("drafts")
       .withIndex("by_run", (q) => q.eq("crawlRunId", crawlRunId))
       .collect();
-    return { run, documents, drafts: drafts.length, city: await ctx.db.get(run.cityId) };
+    return {
+      run,
+      documents,
+      drafts: drafts.length,
+      namedDrafts: drafts.filter((draft) => draft.members.length > 0).length,
+      city: await ctx.db.get(run.cityId),
+    };
   },
 });
 

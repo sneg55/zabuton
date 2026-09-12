@@ -79,7 +79,7 @@ export function Appointments() {
             <div className="body-card-head" style={{ cursor: "default" }}>
               <div>
                 <div className="name">{body.name}</div>
-                <div className="small muted">{[body.termLength && `Terms ${body.termLength}`, body.termLimit && `limit ${body.termLimit}`, body.meetingCadence].filter(Boolean).join(". ")}</div>
+                <div className="small muted">{[body.termLength && `Terms ${body.termLength}`, body.termLimit && `Limit ${body.termLimit}`, body.meetingCadence].filter(Boolean).join(". ")}</div>
               </div>
               <span className="small muted">{seats.length} {seats.length === 1 ? "seat" : "seats"}</span>
             </div>

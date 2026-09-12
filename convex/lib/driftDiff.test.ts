@@ -35,6 +35,11 @@ describe("diffRoster", () => {
     expect(flags[0].snippet).toBe("Bo 12/28");
   });
 
+  it("treats a vacancy row on the page as a seat state, not a person", () => {
+    const rows = [published(), published({ name: "Vacant", termEnd: null, snippet: "Vacant" }), published({ name: "Vacant (December 2026)", termEnd: "12/26", snippet: "Vacant (December 2026)" })];
+    expect(diffRoster(rows, [tracked()])).toEqual([]);
+  });
+
   it("flags a tracked member who is gone from the page, carrying the seat", () => {
     const flags = diffRoster([], [tracked()]);
     expect(flags).toHaveLength(1);

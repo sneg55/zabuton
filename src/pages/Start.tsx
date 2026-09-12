@@ -83,6 +83,13 @@ function RunAgain({ websiteUrl }: { websiteUrl: string }) {
   );
 }
 
+function draftSummary(drafts: number, named: number): string {
+  if (drafts === 0) return "";
+  if (named === 0) return "None of them names its members: the city publishes term rules and seat counts, but not who holds the seats. A spreadsheet import fills that in.";
+  if (named === drafts) return drafts === 1 ? "It names its members." : "All of them name their members.";
+  return `${named} of ${drafts} name their members; the rest carry term rules or seat counts only.`;
+}
+
 function hostOf(url: string) {
   try {
     return new URL(url.startsWith("http") ? url : `https://${url}`).hostname.replace(/^www\./, "");
@@ -92,7 +99,7 @@ function hostOf(url: string) {
 }
 
 function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<typeof api.bootstrap.status>>> }) {
-  const { run, documents, drafts, city } = status;
+  const { run, documents, drafts, namedDrafts, city } = status;
   const stepIndex = STEPS.findIndex((s) => s.key.includes(run.status));
   return (
     <div className="stack" style={{ gap: 20 }}>
@@ -118,7 +125,7 @@ function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<ty
         <div className="card card-pad row between">
           <div>
             <div className="display display-md">{drafts} draft {drafts === 1 ? "body" : "bodies"} ready to review</div>
-            <p className="muted">Each draft shows the sentence every name and date came from. Confirm them one by one from the clerk desk.</p>
+            <p className="muted">{draftSummary(drafts, namedDrafts)} Each draft shows the sentence every name and date came from. Confirm them one by one from the clerk desk.</p>
           </div>
           <div className="row">
             <Link to="/clerk/review" className="btn">Review drafts</Link>

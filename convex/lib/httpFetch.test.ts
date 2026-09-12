@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_FETCH_BYTES, TooLargeError, readCapped } from "./httpFetch";
+import { MAX_FETCH_BYTES, TooLargeError, readCapped, looksLikeBotWall } from "./httpFetch";
 
 function streamOf(chunks: Uint8Array[], headers: Record<string, string> = {}): Response {
   const stream = new ReadableStream<Uint8Array>({
@@ -23,5 +23,16 @@ describe("readCapped", () => {
   it("stops reading once the streamed bytes pass the cap", async () => {
     const response = streamOf([new Uint8Array(6), new Uint8Array(6)]);
     await expect(readCapped(response, 10)).rejects.toThrow(/over the/);
+  });
+});
+
+describe("looksLikeBotWall", () => {
+  it("recognises an interstitial bot check served as HTML", () => {
+    expect(looksLikeBotWall("text/html", "Pardon Our Interruption As you were browsing something about your browser made us think you were a bot.")).toBe(true);
+  });
+
+  it("leaves real pages and PDFs alone", () => {
+    expect(looksLikeBotWall("text/html", "Members Connie Mack, Committee Member - Term expires June 2022")).toBe(false);
+    expect(looksLikeBotWall("application/pdf", null)).toBe(false);
   });
 });

@@ -15,7 +15,7 @@ export function SignIn() {
     <div className="card card-pad stack demo-card">
       <div>
         <strong>Just looking?</strong>
-        <p className="small muted">Open the clerk desk as a demo clerk. No account needed; you can review drafts, handle applications and run a drift check on the sample cities.</p>
+        <p className="small muted">Open the clerk desk as a demo clerk. No account needed; the sample cities are look-only, and a city you build from the front page is yours to review and confirm.</p>
       </div>
       <div>
         <button

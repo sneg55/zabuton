@@ -262,6 +262,7 @@ const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46];
 
 export function looksLikePdf(url: string, contentType: string, bytes: Uint8Array): boolean {
   if (contentType.includes("pdf")) return true;
+  if (contentType.includes("html")) return false;
   if (url.toLowerCase().split("?")[0].endsWith(".pdf")) return true;
   return PDF_MAGIC.every((byte, i) => bytes[i] === byte);
 }

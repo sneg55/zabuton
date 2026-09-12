@@ -324,3 +324,16 @@ export const trimInboundQuotes = internalMutation({
     return n;
   },
 });
+
+export const deleteVacancyDriftFlags = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let n = 0;
+    for (const flag of await ctx.db.query("driftFlags").collect()) {
+      if (flag.status !== "open" || !isVacancyName(flag.published)) continue;
+      await ctx.db.delete(flag._id);
+      n += 1;
+    }
+    return n;
+  },
+});

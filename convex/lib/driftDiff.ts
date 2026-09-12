@@ -1,4 +1,5 @@
 import { canonicalPerson } from "./draftTypes";
+import { isVacancyName } from "./seatStatus";
 import { normalizeTermEnd } from "./termDates";
 
 export type PublishedMember = {
@@ -43,7 +44,8 @@ function withEnd(name: string, end: string): string {
   return end === UNKNOWN_END ? name : `${name} (${end})`;
 }
 
-export function diffRoster(published: PublishedMember[], tracked: TrackedMember[]): DriftDifference[] {
+export function diffRoster(publishedRows: PublishedMember[], tracked: TrackedMember[]): DriftDifference[] {
+  const published = publishedRows.filter((member) => !isVacancyName(member.name));
   const trackedByPerson = new Map<string, TrackedMember>();
   for (const member of tracked) trackedByPerson.set(canonicalPerson(member.name), member);
   const publishedByPerson = new Map<string, PublishedMember>();

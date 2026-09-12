@@ -9,7 +9,7 @@ const DAY_MS = 86_400_000;
 const VACANCY_NAME = /^(vacant|vacancy|vacant seat|open|open seat|unfilled|tbd|tba|to be determined|to be appointed|none|n\/a|-+)$/i;
 
 export function isVacancyName(name: string): boolean {
-  return VACANCY_NAME.test(name.trim());
+  return VACANCY_NAME.test(name.replace(/\s*\([^)]*\)\s*$/, "").trim());
 }
 
 export function seatStatus(endsAt: number | null, now: number, thresholdDays: number, occupancy: Occupancy = "held"): SeatStatus {

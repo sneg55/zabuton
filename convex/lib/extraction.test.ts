@@ -138,6 +138,10 @@ describe("draftsFor", () => {
 });
 
 describe("looksLikePdf", () => {
+  it("does not trust a .pdf address when the server answered with HTML", () => {
+    expect(looksLikePdf("https://x.gov/roster.pdf", "text/html", htmlBytes)).toBe(false);
+  });
+
   const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]);
   const htmlBytes = new TextEncoder().encode("<html>");
 

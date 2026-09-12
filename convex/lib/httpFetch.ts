@@ -51,6 +51,21 @@ export async function readCapped(response: Response, cap: number = MAX_FETCH_BYT
   return out.buffer;
 }
 
+const BOT_WALL_PHRASES = ["pardon our interruption", "verify you are human", "verify that you are not a robot", "checking your browser", "enable javascript and cookies to continue", "access denied"];
+
+export class BotWallError extends Error {
+  constructor() {
+    super("The city's site answered with a bot check instead of the page");
+    this.name = "BotWallError";
+  }
+}
+
+export function looksLikeBotWall(contentType: string, textPreview: string | null): boolean {
+  if (!contentType.includes("html") || textPreview === null) return false;
+  const head = textPreview.slice(0, 600).toLowerCase();
+  return BOT_WALL_PHRASES.some((phrase) => head.includes(phrase));
+}
+
 export async function fetchWithBrowserUa(url: string): Promise<FetchedDocument> {
   const response = await fetch(url, {
     headers: {
@@ -62,7 +77,9 @@ export async function fetchWithBrowserUa(url: string): Promise<FetchedDocument> 
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
   const contentType = (response.headers.get("content-type") ?? "application/octet-stream").split(";")[0].trim();
   const bytes = await readCapped(response);
-  return { bytes, contentType, textPreview: previewFor(contentType, bytes) };
+  const textPreview = previewFor(contentType, bytes);
+  if (looksLikeBotWall(contentType, textPreview)) throw new BotWallError();
+  return { bytes, contentType, textPreview };
 }
 
 export function textOf(bytes: ArrayBuffer, contentType: string): string {

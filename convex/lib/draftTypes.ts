@@ -23,7 +23,7 @@ export type DraftInput = {
 export type DocumentKind = "unclassified" | "roster" | "vacancy_notice" | "rules_page" | "other";
 
 export function canonicalName(name: string): string {
-  return name.toLowerCase().replace(/&/g, "and").replace(/[^a-z]+/g, " ").trim();
+  return name.toLowerCase().replace(/\s*\([^)]*\)\s*$/, "").replace(/&/g, "and").replace(/[^a-z]+/g, " ").trim();
 }
 
 export function canonicalPerson(name: string): string {

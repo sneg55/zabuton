@@ -8,6 +8,7 @@ import {
   previewOf,
   stripTags,
   titleFromUrl,
+  candidateScore,
 } from "./discover";
 import { canonicalName, mergeDrafts, mergeRunDrafts, type DraftInput } from "./draftTypes";
 import { csvToDrafts, parseCsv } from "./csv";
@@ -100,6 +101,7 @@ describe("candidate URLs", () => {
 describe("canonicalName and the rules merge", () => {
   it("collapses case, ampersands and punctuation", () => {
     expect(canonicalName("Heritage & Cultural Arts Commission")).toBe("heritage and cultural arts commission");
+    expect(canonicalName("Tri-Valley Accessible Advisory Committee (TAAC)")).toBe("tri valley accessible advisory committee");
     expect(canonicalName("Planning  Commission.")).toBe("planning commission");
   });
 
@@ -223,5 +225,17 @@ describe("text helpers", () => {
   });
   it("names a document from its URL", () => {
     expect(titleFromUrl("https://dublin.ca.gov/DocumentCenter/View/36214/Maddy-Act-2024")).toBe("Maddy Act 2024");
+  });
+});
+
+describe("candidateScore word starts", () => {
+  it("scores boards-commissions paths and headings", () => {
+    expect(candidateScore("https://x.gov/boards-commissions")).toBe(2);
+    expect(candidateScore("https://x.gov/news/1", "Meet the Members of the Boards and Commissions")).toBe(1);
+  });
+
+  it("ignores words that merely end in a keyword", () => {
+    expect(candidateScore("https://x.gov/blog/e-glide-powerboards")).toBe(0);
+    expect(candidateScore("https://x.gov/blog/1", "Kiwanis donates new scoreboards at Belmar park")).toBe(0);
   });
 });

@@ -41,3 +41,11 @@ describe("isVacancyName", () => {
     expect(isVacancyName("Ada Lovelace")).toBe(false);
   });
 });
+
+describe("isVacancyName", () => {
+  it("accepts a vacancy label with a trailing note", () => {
+    expect(isVacancyName("Vacant (December 2026)")).toBe(true);
+    expect(isVacancyName("Vacant")).toBe(true);
+    expect(isVacancyName("Victoria Liu")).toBe(false);
+  });
+});
