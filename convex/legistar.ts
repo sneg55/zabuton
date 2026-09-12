@@ -75,10 +75,13 @@ function personName(record: LegistarOfficeRecord): string {
   return [record.OfficeRecordFirstName, record.OfficeRecordLastName].filter((part) => !!part).join(" ").trim();
 }
 
+const OPEN_ENDED_YEAR = 9000;
+
 function isoDate(value: string | null | undefined): string | null {
   if (!value) return null;
   const trimmed = value.slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  return Number(trimmed.slice(0, 4)) >= OPEN_ENDED_YEAR ? null : trimmed;
 }
 
 function roleOf(record: LegistarOfficeRecord): string | null {
@@ -90,7 +93,7 @@ function roleOf(record: LegistarOfficeRecord): string | null {
 
 export function officeRecordSnippet(record: LegistarOfficeRecord): string {
   const start = isoDate(record.OfficeRecordStartDate) ?? "unknown";
-  const end = isoDate(record.OfficeRecordEndDate) ?? "unknown";
+  const end = isoDate(record.OfficeRecordEndDate) ?? (record.OfficeRecordEndDate ? "open-ended" : "unknown");
   return `${personName(record)} | ${roleOf(record) ?? "Member"} | ${start} -> ${end}`;
 }
 

@@ -97,3 +97,10 @@ describe("officeRecordsToPublished", () => {
     });
   });
 });
+
+describe("open-ended Legistar terms", () => {
+  it("treats the 9999 sentinel as no end date", () => {
+    const record = { OfficeRecordFullName: "Jan Godek", OfficeRecordTitle: "Lodi Township Rep.", OfficeRecordStartDate: "2017-10-09T00:00:00", OfficeRecordEndDate: "9999-12-31T00:00:00" } as Parameters<typeof officeRecordSnippet>[0];
+    expect(officeRecordSnippet(record)).toBe("Jan Godek | Lodi Township Rep. | 2017-10-09 -> open-ended");
+  });
+});
