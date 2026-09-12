@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation, type MutationCtx } from "./_generated/server";
-import { isGenericBodyName } from "./lib/draftTypes";
+import { cleanRole, isGenericBodyName } from "./lib/draftTypes";
 import { isVacancyName } from "./lib/seatStatus";
 
 export const setTermEnd = internalMutation({
@@ -208,5 +208,20 @@ export const setCityStatus = internalMutation({
     const city = await cityBySlug(ctx, slug);
     await ctx.db.patch(city._id, { status });
     return city._id;
+  },
+});
+
+export const cleanSeatLabels = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let n = 0;
+    for (const seat of await ctx.db.query("seats").collect()) {
+      if (!seat.label) continue;
+      const cleaned = cleanRole(seat.label);
+      if (cleaned === seat.label) continue;
+      await ctx.db.patch(seat._id, { label: cleaned ?? undefined });
+      n += 1;
+    }
+    return n;
   },
 });

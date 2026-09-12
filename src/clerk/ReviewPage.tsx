@@ -27,7 +27,7 @@ export function ReviewPage() {
   const dismissMany = useMutation(api.drafts.dismissMany);
   const [tab, setTab] = useState<Evidence | "all">("all");
   const [filter, setFilter] = useState("");
-  const [open, setOpen] = useState<Id<"drafts"> | null>(null);
+  const [open, setOpen] = useState<Id<"drafts"> | "none" | null>(null);
   if (drafts === undefined) return null;
   const byEvidence = new Map<Evidence, typeof drafts>();
   for (const d of drafts) {
@@ -37,7 +37,7 @@ export function ReviewPage() {
   const inTab = tab === "all" ? EVIDENCE_ORDER.flatMap((e) => byEvidence.get(e) ?? []) : byEvidence.get(tab) ?? [];
   const needle = filter.trim().toLowerCase();
   const shown = needle === "" ? inTab : inTab.filter((d) => d.name.toLowerCase().includes(needle));
-  const openId = open && shown.some((d) => d._id === open) ? open : shown[0]?._id ?? null;
+  const openId = open === "none" ? null : open && shown.some((d) => d._id === open) ? open : shown[0]?._id ?? null;
   return (
     <div className="page">
       <PageHead
@@ -70,7 +70,7 @@ export function ReviewPage() {
       <div className="stack" style={{ gap: 8 }}>
         {shown.map((d) => (
           <section key={d._id} className="card">
-            <button className="draft-row" onClick={() => setOpen(openId === d._id ? null : d._id)} aria-expanded={openId === d._id}>
+            <button className="draft-row" onClick={() => setOpen(openId === d._id ? "none" : d._id)} aria-expanded={openId === d._id}>
               <span className="name">{d.name}</span>
               <span className="counts">
                 <span className="pill pill-neutral">{EVIDENCE_LABEL[draftEvidence(d)]}</span>
