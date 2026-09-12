@@ -30,6 +30,14 @@ function failureNote(error: unknown): string {
   return `email not sent: ${message}`;
 }
 
+export function inboundText(inbound: Record<string, unknown> | null): string {
+  for (const key of ["extracted_text", "extractedText", "text"]) {
+    const value = inbound?.[key];
+    if (typeof value === "string" && value.trim() !== "") return value;
+  }
+  return "";
+}
+
 function inboundAt(timestamp: unknown): number {
   if (typeof timestamp === "string") {
     const parsed = Date.parse(timestamp);
@@ -269,7 +277,7 @@ export const onMessageReceived = internalMutation({
       from: typeof inbound?.from === "string" ? inbound.from : undefined,
       to: recipients(inbound?.to),
       subject: typeof inbound?.subject === "string" ? inbound.subject : undefined,
-      text: typeof inbound?.text === "string" ? inbound.text : "",
+      text: inboundText(inbound),
       at: inboundAt(inbound?.timestamp),
     });
   },

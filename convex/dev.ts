@@ -293,3 +293,34 @@ export const setApplicationEmail = internalMutation({
     return n;
   },
 });
+
+export const pruneApplicationNotes = internalMutation({
+  args: { slug: v.string(), note: v.string() },
+  handler: async (ctx, { slug, note }) => {
+    const city = await cityBySlug(ctx, slug);
+    let n = 0;
+    for (const app of await ctx.db.query("applications").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()) {
+      for (const event of await ctx.db.query("applicationEvents").withIndex("by_application", (q) => q.eq("applicationId", app._id)).collect()) {
+        if (event.note !== note) continue;
+        await ctx.db.delete(event._id);
+        n += 1;
+      }
+    }
+    return n;
+  },
+});
+
+const QUOTED_REPLY = /\n\nOn .{0,200}wrote:\n[\s\S]*$/;
+
+export const trimInboundQuotes = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let n = 0;
+    for (const message of await ctx.db.query("messages").collect()) {
+      if (message.direction !== "inbound" || !QUOTED_REPLY.test(message.text)) continue;
+      await ctx.db.patch(message._id, { text: message.text.replace(QUOTED_REPLY, "").trim() });
+      n += 1;
+    }
+    return n;
+  },
+});
