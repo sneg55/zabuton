@@ -102,7 +102,7 @@ function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<ty
             {s.label}
           </span>
         ))}
-        {run.status === "failed" && <span className="progress-step" style={{ background: "var(--brick-tint)", color: "var(--brick)" }}>Stopped</span>}
+        {run.status === "failed" && <span className="progress-step stopped">Stopped</span>}
       </div>
       {run.status === "failed" && (
         <div className="notice notice-danger stack" style={{ gap: 10 }}>

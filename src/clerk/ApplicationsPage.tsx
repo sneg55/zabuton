@@ -42,7 +42,7 @@ export function ApplicationsPage() {
               <thead><tr><th>Applicant</th><th>Body</th><th>State</th><th>Updated</th></tr></thead>
               <tbody>
                 {list.map((a) => (
-                  <tr key={a._id} onClick={() => setOpenId(a._id)} style={{ cursor: "pointer", background: a._id === openId ? "var(--chamber-tint)" : undefined }}>
+                  <tr key={a._id} onClick={() => setOpenId(a._id)} className={a._id === openId ? "selected" : undefined} style={{ cursor: "pointer" }}>
                     <td>{a.applicantName}<div className="small muted">{a.email}</div></td>
                     <td>{a.bodyName ?? <span className="muted">Any opening</span>}{a.seatLabel && <div className="small muted">{a.seatLabel}</div>}</td>
                     <td><span className={`pill ${a.state === "appointed" ? "pill-active" : a.state === "declined" ? "pill-expired" : "pill-neutral"}`}>{STATE_LABEL[a.state]}</span></td>

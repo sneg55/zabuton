@@ -5,7 +5,7 @@ import { Link, NavLink, Outlet, useOutletContext } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { SignIn } from "../SignIn";
-import { SiteFrame } from "../ui/Site";
+import { SiteFrame, Wordmark } from "../ui/Site";
 
 type ShellContext = { city: Doc<"cities"> };
 
@@ -90,7 +90,7 @@ function ShellInner() {
   return (
     <div className="shell">
       <aside className="rail">
-        <Link to="/" className="wordmark">Zabuton</Link>
+        <Wordmark />
         <div className="rail-city">
           {cities.length > 1 ? (
             <select className="select" value={city._id} onChange={(e) => setCityId(e.target.value)}>

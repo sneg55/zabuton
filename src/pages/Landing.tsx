@@ -14,9 +14,9 @@ export function Landing() {
   const [url, setUrl] = useState("");
   return (
     <SiteFrame>
-      <section className="hero hero-split">
+      <section className="hero hero-band">
         <div className="hero-head">
-          <h1 className="display display-xl">Every seat, every term, read straight off your city's website.</h1>
+          <h1 className="display display-xl">Every seat, every term, read straight off your <span className="accent">city's website</span>.</h1>
           <p className="lede">
             Zabuton finds the boards and commissions pages a city already publishes, builds the roster with terms and term limits, and then keeps
             watch: expiring seats, vacancies, applications from residents, and the notices that go out before a term runs down.
@@ -31,9 +31,11 @@ export function Landing() {
             <input className="input" type="url" placeholder="https://www.yourcity.gov" value={url} onChange={(e) => setUrl(e.target.value)} aria-label="Your city's website" required />
             <button className="btn" type="submit">Build the roster</button>
           </form>
-          <p className="small muted">Works on the pages and PDFs a clerk already maintains. Nothing is guessed: a date the city has not published stays unknown.</p>
+          <p className="small muted note">Works on the pages and PDFs a clerk already maintains. Nothing is guessed: a date the city has not published stays unknown.</p>
         </div>
-        <ExampleDais />
+        <div className="hero-stage">
+          <ExampleDais />
+        </div>
       </section>
 
       <section className="section">
@@ -41,6 +43,7 @@ export function Landing() {
           <h2 className="display display-lg">How a city gets on</h2>
           <p className="lede">Three steps, all of them visible on screen while they run.</p>
         </div>
+        <div className="feature-block">
         <div className="steps">
           <div className="step">
             <h3>Find the pages</h3>
@@ -54,6 +57,7 @@ export function Landing() {
             <h3>Confirm body by body</h3>
             <p>The clerk reviews each draft board against its source and confirms it. Nothing unconfirmed drives a notice or a public page.</p>
           </div>
+        </div>
         </div>
       </section>
 
@@ -95,7 +99,7 @@ export function Landing() {
 function ExampleDais() {
   const city = useQuery(api.roster.cityBySlug, { slug: "dublin-ca" });
   const rows = useQuery(api.roster.city, city ? { cityId: city._id } : "skip");
-  if (!city || !rows) return <div className="dais" style={{ minHeight: 320 }} />;
+  if (!city || !rows) return <div className="dais" style={{ minHeight: 320 }} aria-hidden="true" />;
   const picked = rows.filter((r) => EXAMPLE_BODIES.includes(r.body.name));
   const totals = rows.reduce(
     (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active, unlisted: acc.unlisted + r.counts.unlisted }),
@@ -106,7 +110,7 @@ function ExampleDais() {
       <div className="dais-head">
         <div>
           <span className="display display-md">{city.name}</span>
-          <span className="muted">, read from the city's own boards and commissions pages</span>
+          <span className="muted small">, read from the city's own boards and commissions pages</span>
         </div>
         <div className="counts">
           <StatusPill status="expired" count={totals.expired} />

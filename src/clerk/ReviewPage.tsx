@@ -121,7 +121,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
     <>
       <div className="body-card-head" style={{ cursor: "default", alignItems: "flex-start", paddingTop: 4 }}>
         <div className="stack" style={{ gap: 8, flex: 1, minWidth: 0 }}>
-          <input className="input" value={name} onChange={(e) => edit(setName)(e.target.value)} aria-label="Body name" style={{ fontFamily: "var(--display)", fontSize: "1.2rem", height: 44 }} />
+          <input className="input draft-title" value={name} onChange={(e) => edit(setName)(e.target.value)} aria-label="Body name" />
           <div className="row" style={{ gap: 8 }}>
             <input className="input" value={termLength} onChange={(e) => edit(setTermLength)(e.target.value)} placeholder="Term length, e.g. four years" style={{ maxWidth: 240 }} aria-label="Term length" />
             <input className="input" value={termLimit} onChange={(e) => edit(setTermLimit)(e.target.value)} placeholder="Term limit, e.g. two terms" style={{ maxWidth: 240 }} aria-label="Term limit" />
