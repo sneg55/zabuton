@@ -2,6 +2,8 @@ import { Authenticated, Unauthenticated } from "convex/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+export const REPO_URL = "https://github.com/sneg55/zabuton";
+
 export function SiteFrame({ children }: { children: ReactNode }) {
   return (
     <div className="site">
@@ -21,8 +23,12 @@ export function SiteFrame({ children }: { children: ReactNode }) {
       </header>
       {children}
       <footer className="footer">
-        <span>Zabuton reads the city's own website and keeps the roster honest. Built on Convex with Firecrawl, OpenAI and AgentMail.</span>
-        <span>Open source, self-hostable.</span>
+        <span>
+          Zabuton reads the city's own website and keeps the roster honest. Built on <a href="https://convex.dev" target="_blank" rel="noreferrer">Convex</a> with{" "}
+          <a href="https://firecrawl.dev" target="_blank" rel="noreferrer">Firecrawl</a>, <a href="https://openai.com" target="_blank" rel="noreferrer">OpenAI</a> and{" "}
+          <a href="https://agentmail.to" target="_blank" rel="noreferrer">AgentMail</a>.
+        </span>
+        <a href={REPO_URL} target="_blank" rel="noreferrer">Open source, self-hostable.</a>
       </footer>
     </div>
   );

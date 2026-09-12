@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { SiteFrame } from "../ui/Site";
+import { CityNotFound } from "./PublicCity";
 
 export function Apply() {
   const { slug = "" } = useParams();
@@ -12,12 +13,17 @@ export function Apply() {
   const rows = useQuery(api.roster.city, city ? { cityId: city._id } : "skip");
   const submit = useMutation(api.applications.submit);
   const [bodyId, setBodyId] = useState<string>(params.get("body") ?? "");
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const seatId = params.get("seat");
-  if (!city) return <SiteFrame><div className="hero" /></SiteFrame>;
+  const mailOn = useQuery(api.mail.isConfigured);
+  const board = useQuery(api.roster.board, seatId && bodyId ? { bodyId: bodyId as Id<"bodies"> } : "skip");
+  if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === null) return <CityNotFound />;
   const chosen = rows?.find((r) => r.body._id === bodyId);
+  const seat = board?.seats.find((row) => row.seat._id === seatId);
+  const seatName = seat ? seat.seat.label ?? `Seat ${seat.seat.ordinal}` : null;
   if (done) {
     return (
       <SiteFrame>
@@ -25,7 +31,9 @@ export function Apply() {
           <div className="hero-head">
             <h1 className="display display-xl">Application received</h1>
             <p className="lede">
-              The clerk's office has it. You will hear back by email on the same thread, so replies to that message reach the clerk directly.
+              {mailOn
+                ? "The clerk's office has it. You will hear back by email on the same thread, so replies to that message reach the clerk directly."
+                : `The clerk's office has it and will reply to ${done} directly.`}
             </p>
             <div className="row">
               <Link to={`/c/${city.slug}`} className="btn btn-secondary">Back to the roster</Link>
@@ -58,7 +66,7 @@ export function Apply() {
               email: String(f.get("email")),
               statement: String(f.get("statement")),
             })
-              .then(() => setDone(true))
+              .then(() => setDone(String(f.get("email"))))
               .catch(() => setError("The application could not be saved. Try again in a moment."))
               .finally(() => setBusy(false));
           }}
@@ -72,7 +80,7 @@ export function Apply() {
               ))}
             </select>
           </label>
-          {seatId && chosen && <p className="small muted">Applying for a specific seat on the {chosen.body.name}.</p>}
+          {seatId && chosen && <p className="small muted">Applying for the {seatName ?? "selected"} seat on the {chosen.body.name}.</p>}
           <label className="field">
             <span>Your name</span>
             <input className="input" name="name" required autoComplete="name" />

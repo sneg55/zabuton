@@ -1,8 +1,11 @@
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useQuery } from "convex/react";
 import { useState } from "react";
+import { api } from "../convex/_generated/api";
 
 export function SignIn() {
   const { signIn } = useAuthActions();
+  const clerkExists = useQuery(api.users.clerkExists);
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -28,10 +31,13 @@ export function SignIn() {
         <span>Password</span>
         <input className="input" name="password" type="password" required minLength={8} autoComplete={flow === "signIn" ? "current-password" : "new-password"} />
       </label>
-      <button className="btn" type="submit" disabled={busy}>{flow === "signIn" ? "Sign in" : "Create account"}</button>
-      <button type="button" className="btn btn-quiet" onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}>
-        {flow === "signIn" ? "First time here? Create the clerk account" : "Already have an account? Sign in"}
-      </button>
+      <button className="btn" type="submit" disabled={busy}>{flow === "signIn" ? "Sign in" : "Create the clerk account"}</button>
+      {clerkExists === false && (
+        <button type="button" className="btn btn-quiet" onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}>
+          {flow === "signIn" ? "First time on this deployment? Create the clerk account" : "Already have an account? Sign in"}
+        </button>
+      )}
+      {clerkExists === true && <p className="small muted">This deployment already has its clerk account. Ask the clerk's office for access.</p>}
       {error && <p className="error small">{error}</p>}
     </form>
   );

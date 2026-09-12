@@ -1,5 +1,6 @@
 import { useAction, useMutation, useQuery } from "convex/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDate, formatDateTime } from "../lib/format";
@@ -9,6 +10,8 @@ import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
 
 const KIND_LABEL: Record<Doc<"notices">["kind"], string> = { term_expiry: "Term expiry", reappointment: "Reappointment" };
+const STALE_DAYS = 90;
+const DAY = 86_400_000;
 
 export function NoticesPage() {
   const city = useCity();
@@ -21,7 +24,10 @@ export function NoticesPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   if (!notices || !openings) return null;
-  const withMembers = openings.filter((o) => o.row.member && o.row.status !== "vacant");
+  const now = Date.now();
+  const held = openings.filter((o) => o.row.member && o.row.status !== "vacant" && o.row.status !== "unlisted");
+  const stale = held.filter((o) => o.row.term?.endsAt !== undefined && o.row.term.endsAt < now - STALE_DAYS * DAY);
+  const withMembers = held.filter((o) => !stale.includes(o));
   const noticed = new Set(notices.filter((n) => n.status !== "failed").map((n) => n.seatId));
   const pending = notices.filter((n) => n.status === "draft");
   const sent = notices.filter((n) => n.status !== "draft");
@@ -31,7 +37,12 @@ export function NoticesPage() {
       {error && <div className="notice notice-danger">{error}</div>}
       <section className="stack">
         <h2 className="display display-md">Seats that need a notice</h2>
-        {withMembers.length === 0 && <Empty title="No expiring or ended terms">Notices appear here as seats enter the notice window.</Empty>}
+        {withMembers.length === 0 && <Empty title="No expiring or recently ended terms">Notices appear here as seats enter the notice window.</Empty>}
+        {stale.length > 0 && (
+          <p className="small muted">
+            {stale.length === 1 ? "1 seat" : `${stale.length} seats`} ended more than {STALE_DAYS} days ago ({stale.map((o) => o.row.member!.name).join(", ")}). A notice would reach someone whose term is long over; update the roster from <Link to="/clerk/drift">Drift</Link> instead.
+          </p>
+        )}
         {withMembers.length > 0 && (
           <div className="table-wrap">
             <table className="table">
@@ -107,7 +118,7 @@ export function NoticesPage() {
       )}
       {sent.length > 0 && (
         <section className="stack">
-          <h2 className="display display-md">Sent and failed</h2>
+          <h2 className="display display-md">Approved notices</h2>
           <div className="table-wrap">
             <table className="table">
               <thead><tr><th>Subject</th><th>To</th><th>Status</th><th>When</th></tr></thead>

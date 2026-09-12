@@ -2,6 +2,7 @@ import { useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
+import type { SeatStatus } from "../../convex/lib/seatStatus";
 import { formatDate, pluralize } from "../lib/format";
 import { Nameplate } from "../ui/Nameplate";
 import { Empty } from "../ui/PageHead";
@@ -9,12 +10,24 @@ import { SiteFrame } from "../ui/Site";
 import { SourceLink } from "../ui/SourceLink";
 import { StatusPill } from "../ui/StatusPill";
 
+export function CityNotFound() {
+  return (
+    <SiteFrame>
+      <section className="hero">
+        <Empty title="No city at this address">
+          Check the link, or <Link to="/">start from the front page</Link> to add a city.
+        </Empty>
+      </section>
+    </SiteFrame>
+  );
+}
+
 export function PublicCity() {
   const { slug = "" } = useParams();
   const city = useQuery(api.roster.cityBySlug, { slug });
   const rows = useQuery(api.roster.city, city ? { cityId: city._id } : "skip");
   if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
-  if (city === null) return <SiteFrame><Empty title="No city at this address">Check the link, or start from the front page to add a city.</Empty></SiteFrame>;
+  if (city === null) return <CityNotFound />;
   const bodies = rows ?? [];
   return (
     <SiteFrame>
@@ -29,6 +42,12 @@ export function PublicCity() {
         </div>
       </section>
       <div className="stack" style={{ paddingBottom: 48 }}>
+        {rows && rows.length === 0 && (
+          <Empty title="No roster published yet">
+            The clerk's office has not confirmed any boards or commissions for {city.name}. Until then, the city's own site is the place to look:{" "}
+            <a href={city.websiteUrl} target="_blank" rel="noreferrer">{city.domain}</a>.
+          </Empty>
+        )}
         {bodies.map((r) => (
           <PublicBody key={r.body._id} body={r.body} counts={r.counts} slug={city.slug} />
         ))}
@@ -37,8 +56,10 @@ export function PublicCity() {
   );
 }
 
-function PublicBody({ body, counts, slug }: { body: Doc<"bodies">; counts: Record<"vacant" | "expired" | "expiring" | "active", number>; slug: string }) {
+function PublicBody({ body, counts, slug }: { body: Doc<"bodies">; counts: Record<SeatStatus, number>; slug: string }) {
   const data = useQuery(api.roster.board, { bodyId: body._id });
+  const total = counts.vacant + counts.expired + counts.expiring + counts.active + counts.unlisted;
+  const countOnly = total > 0 && counts.unlisted === total;
   return (
     <section className="card body-card">
       <div className="body-card-head" style={{ cursor: "default" }}>
@@ -52,14 +73,19 @@ function PublicBody({ body, counts, slug }: { body: Doc<"bodies">; counts: Recor
           {counts.vacant > 0 && <StatusPill status="vacant" count={counts.vacant} />}
           {counts.expired > 0 && <StatusPill status="expired" count={counts.expired} />}
           {counts.expiring > 0 && <StatusPill status="expiring" count={counts.expiring} />}
+          {counts.unlisted > 0 && !countOnly && <StatusPill status="unlisted" count={counts.unlisted} />}
         </div>
       </div>
       <div className="body-card-body">
-        <div className="dais-seats">
-          {(data?.seats ?? []).map(({ seat, member, term, status }) => (
-            <Nameplate key={seat._id} seat={seat} member={member} term={term} status={status} />
-          ))}
-        </div>
+        {countOnly ? (
+          <p className="muted">The city lists {pluralize(total, "seat")} for this body but does not publish who holds them or when the terms end.</p>
+        ) : (
+          <div className="dais-seats">
+            {(data?.seats ?? []).map(({ seat, member, term, status }) => (
+              <Nameplate key={seat._id} seat={seat} member={member} term={term} status={status} />
+            ))}
+          </div>
+        )}
         <div className="row between">
           <span className="provenance">
             Source: <SourceLink url={body.sourceUrl} />
@@ -75,14 +101,15 @@ export function Openings() {
   const { slug = "" } = useParams();
   const city = useQuery(api.roster.cityBySlug, { slug });
   const openings = useQuery(api.roster.openings, city ? { cityId: city._id } : "skip");
-  if (!city) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === undefined) return <SiteFrame><div className="hero" /></SiteFrame>;
+  if (city === null) return <CityNotFound />;
   return (
     <SiteFrame>
       <section className="hero" style={{ paddingBottom: 24 }}>
         <div className="hero-head">
           <h1 className="display display-xl">Open and expiring seats in {city.name}</h1>
           <p className="lede">
-            {openings ? pluralize(openings.length, "seat") : "Seats"} are open, ended, or within the notice window. Apply to a specific seat or to a body's pool.
+            {openings ? (openings.length === 1 ? "1 seat is" : `${openings.length} seats are`) : "Seats are"} open, ended, or within the notice window. Apply to a specific seat or to a body's pool.
           </p>
           <div className="row">
             <Link to={`/c/${city.slug}/apply`} className="btn">Apply for a seat</Link>
@@ -101,7 +128,7 @@ export function Openings() {
                 <td>{body.name}</td>
                 <td>{row.seat.label ?? `Seat ${row.seat.ordinal}`}</td>
                 <td>{row.member?.name ?? <span className="muted">Open</span>}</td>
-                <td className="num">{formatDate(row.term?.endsAt, row.term?.rawEnd)}</td>
+                <td className="num">{row.term ? formatDate(row.term.endsAt, row.term.rawEnd) : ""}</td>
                 <td><StatusPill status={row.status} /></td>
                 <td><Link to={`/c/${city.slug}/apply?body=${body._id}&seat=${row.seat._id}`}>Apply</Link></td>
               </tr>

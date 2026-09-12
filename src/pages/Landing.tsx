@@ -14,7 +14,7 @@ export function Landing() {
   const [url, setUrl] = useState("");
   return (
     <SiteFrame>
-      <section className="hero">
+      <section className="hero hero-split">
         <div className="hero-head">
           <h1 className="display display-xl">Every seat, every term, read straight off your city's website.</h1>
           <p className="lede">
@@ -98,8 +98,8 @@ function ExampleDais() {
   if (!city || !rows) return <div className="dais" style={{ minHeight: 320 }} />;
   const picked = rows.filter((r) => EXAMPLE_BODIES.includes(r.body.name));
   const totals = rows.reduce(
-    (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active }),
-    { expired: 0, expiring: 0, vacant: 0, active: 0 },
+    (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active, unlisted: acc.unlisted + r.counts.unlisted }),
+    { expired: 0, expiring: 0, vacant: 0, active: 0, unlisted: 0 },
   );
   return (
     <div className="dais">
@@ -133,7 +133,7 @@ function DaisBody({ bodyId, name }: { bodyId: Id<"bodies">; name: string }) {
     <div className="dais-body">
       <h3>{name}</h3>
       <div className="dais-seats">
-        {data.seats.slice(0, 8).map(({ seat, member, term, status }) => (
+        {data.seats.filter((row) => row.status !== "unlisted").slice(0, 6).map(({ seat, member, term, status }) => (
           <Nameplate key={seat._id} seat={seat} member={member} term={term} status={status} />
         ))}
       </div>

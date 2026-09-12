@@ -14,8 +14,8 @@ export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
   const [open, setOpen] = useState<Id<"bodies"> | null>(null);
   if (rows === undefined) return null;
   const totals = rows.reduce(
-    (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active }),
-    { expired: 0, expiring: 0, vacant: 0, active: 0 },
+    (acc, r) => ({ expired: acc.expired + r.counts.expired, expiring: acc.expiring + r.counts.expiring, vacant: acc.vacant + r.counts.vacant, active: acc.active + r.counts.active, unlisted: acc.unlisted + r.counts.unlisted }),
+    { expired: 0, expiring: 0, vacant: 0, active: 0, unlisted: 0 },
   );
   return (
     <div className="page">
@@ -28,6 +28,7 @@ export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
             <StatusPill status="expiring" count={totals.expiring} />
             <StatusPill status="vacant" count={totals.vacant} />
             <StatusPill status="active" count={totals.active} />
+            {totals.unlisted > 0 && <StatusPill status="unlisted" count={totals.unlisted} />}
           </div>
         }
       />
@@ -45,6 +46,7 @@ export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
                 <StatusPill status="expiring" count={counts.expiring} />
                 <StatusPill status="vacant" count={counts.vacant} />
                 <StatusPill status="active" count={counts.active} />
+                {counts.unlisted > 0 && <StatusPill status="unlisted" count={counts.unlisted} />}
               </div>
             </button>
             {open === body._id && <BodySeats bodyId={body._id} />}
@@ -69,10 +71,10 @@ function BodySeats({ bodyId }: { bodyId: Id<"bodies"> }) {
             {data.seats.map(({ seat, member, term, status }) => (
               <tr key={seat._id}>
                 <td>{seat.label ?? seat.ordinal}</td>
-                <td>{member?.name ?? <span className="muted">Open</span>}</td>
+                <td>{member?.name ?? <span className="muted">{status === "unlisted" ? "Not listed" : "Open"}</span>}</td>
                 <td><TermBar startsAt={term?.startsAt ?? parseRawStart(term?.rawStart)} endsAt={term?.endsAt} status={status} /></td>
                 <td className="muted">{formatRawDate(term?.rawStart)}</td>
-                <td className="num">{formatDate(term?.endsAt, term?.rawEnd)}</td>
+                <td className="num">{term ? formatDate(term.endsAt, term.rawEnd) : ""}</td>
                 <td><StatusPill status={status} /></td>
                 <td>{term && <SourceLink url={term.sourceUrl} short />}</td>
               </tr>

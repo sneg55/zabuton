@@ -7,6 +7,7 @@ export const STATUS_LABEL: Record<SeatStatus, string> = {
   expired: "Term ended",
   expiring: "Expiring",
   active: "Active",
+  unlisted: "Not listed",
 };
 
 export function formatDate(ms: number | undefined | null, raw?: string | null): string {

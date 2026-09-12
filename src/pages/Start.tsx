@@ -6,7 +6,7 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { formatDateTime } from "../lib/format";
 import { Empty } from "../ui/PageHead";
 import { SiteFrame } from "../ui/Site";
-import { errorText } from "../lib/errors";
+import { errorText, humanizeRunError } from "../lib/errors";
 
 const STEPS: Array<{ key: Doc<"crawlRuns">["status"][]; label: string }> = [
   { key: ["queued", "discovering"], label: "Finding pages" },
@@ -57,6 +57,32 @@ export function Start() {
   );
 }
 
+function RunAgain({ websiteUrl }: { websiteUrl: string }) {
+  const navigate = useNavigate();
+  const start = useMutation(api.bootstrap.start);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <>
+      <button
+        className="btn btn-sm"
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          setError(null);
+          start({ url: websiteUrl })
+            .then((r) => navigate(`/start?run=${r.crawlRunId}`, { replace: true }))
+            .catch((e: unknown) => setError(errorText(e)))
+            .finally(() => setBusy(false));
+        }}
+      >
+        Run again
+      </button>
+      {error && <span className="small">{error}</span>}
+    </>
+  );
+}
+
 function hostOf(url: string) {
   try {
     return new URL(url.startsWith("http") ? url : `https://${url}`).hostname.replace(/^www\./, "");
@@ -79,8 +105,13 @@ function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<ty
         {run.status === "failed" && <span className="progress-step" style={{ background: "var(--brick-tint)", color: "var(--brick)" }}>Stopped</span>}
       </div>
       {run.status === "failed" && (
-        <div className="notice notice-danger">
-          {run.error ?? "The run stopped before any roster was read."} A clerk can still import the roster from a spreadsheet in Settings.
+        <div className="notice notice-danger stack" style={{ gap: 10 }}>
+          <span>{humanizeRunError(run.error)} Nothing was confirmed, so running again is safe.</span>
+          <div className="row">
+            {city && <RunAgain websiteUrl={city.websiteUrl} />}
+            <Link to="/clerk/settings" className="btn btn-secondary btn-sm">Import a spreadsheet instead</Link>
+          </div>
+          {run.error && <span className="small" style={{ opacity: 0.8 }}>Details: {run.error}</span>}
         </div>
       )}
       {(run.status === "review" || run.status === "done") && (

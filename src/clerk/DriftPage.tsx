@@ -19,6 +19,7 @@ export function DriftPage() {
   const latest = useQuery(api.bootstrap.latestRun, { cityId: city._id, purpose: "drift" });
   const runNow = useMutation(api.drift.runNow);
   const resolve = useMutation(api.drift.resolve);
+  const resolveMany = useMutation(api.drift.resolveMany);
   const [error, setError] = useState<string | null>(null);
   const running = latest && !["review", "done", "failed"].includes(latest.status);
   if (!flags) return null;
@@ -39,6 +40,15 @@ export function DriftPage() {
       {error && <div className="notice notice-danger">{error}</div>}
       {latest?.status === "failed" && latest.error && <div className="notice notice-danger">{latest.error}</div>}
       {flags.length === 0 && <Empty title="Tracked roster matches the city site">Nothing has drifted since the last check.</Empty>}
+      {flags.length > 1 && (
+        <div className="row between card card-pad">
+          <span>{flags.length} differences waiting. Resolve them one by one below, or all at once.</span>
+          <div className="row">
+            <button className="btn btn-sm" onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "accept_published" })}>Update all {flags.length} to the city page</button>
+            <button className="btn btn-secondary btn-sm" onClick={() => void resolveMany({ flagIds: flags.map((f) => f._id), action: "keep_tracked" })}>Keep all as tracked</button>
+          </div>
+        </div>
+      )}
       <div className="stack">
         {flags.map((f) => (
           <div key={f._id} className="card card-pad stack">

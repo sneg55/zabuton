@@ -1,6 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useOutletContext } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
@@ -8,6 +8,24 @@ import { SignIn } from "../SignIn";
 import { SiteFrame } from "../ui/Site";
 
 type ShellContext = { city: Doc<"cities"> };
+
+const CITY_KEY = "zabuton.clerk.city";
+
+function readStoredCity(): string | null {
+  try {
+    return window.localStorage.getItem(CITY_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredCity(cityId: string) {
+  try {
+    window.localStorage.setItem(CITY_KEY, cityId);
+  } catch {
+    return;
+  }
+}
 
 export function useCity() {
   return useOutletContext<ShellContext>().city;
@@ -37,9 +55,12 @@ function ShellInner() {
   const { signOut } = useAuthActions();
   const me = useQuery(api.users.me);
   const cities = useQuery(api.roster.cities);
-  const [cityId, setCityId] = useState<string | null>(null);
+  const [cityId, setCityId] = useState<string | null>(() => readStoredCity());
+  useEffect(() => {
+    if (cityId) writeStoredCity(cityId);
+  }, [cityId]);
   if (cities === undefined || me === undefined) return null;
-  const city = cities.find((c) => c._id === cityId) ?? cities[0];
+  const city = cities.find((c) => c._id === cityId) ?? cities.find((c) => c.status === "confirmed") ?? cities[0];
   if (me && me.role !== "clerk") {
     return (
       <SiteFrame>

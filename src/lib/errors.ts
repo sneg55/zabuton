@@ -1,5 +1,13 @@
 import { ConvexError } from "convex/values";
 
+export function humanizeRunError(error: string | undefined): string {
+  if (!error) return "The run stopped before any roster was read.";
+  if (/out of memory|too large|over the .* limit/i.test(error)) return "A document on the site was too large to read, so the run stopped.";
+  if (/timed? ?out|timeout/i.test(error)) return "The city site took too long to answer, so the run stopped.";
+  if (/Firecrawl|429|rate limit/i.test(error)) return "The crawler was rate limited by the city site, so the run stopped.";
+  return error.replace(/^ConvexError:\s*/, "").split("\n")[0];
+}
+
 export function errorText(error: unknown, fallback = "Something went wrong. Try again."): string {
   if (error instanceof ConvexError) {
     const data: unknown = error.data;
