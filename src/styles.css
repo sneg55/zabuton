@@ -212,7 +212,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .diff > div { padding: 10px 12px; border-radius: var(--radius); background: var(--paper-2); }
 .diff .label { font-size: 0.75rem; color: var(--ink-3); margin-bottom: 4px; }
 .signin { display: grid; gap: 14px; max-width: 380px; }
-.provenance { font-size: 0.8125rem; color: var(--ink-3); }
+.provenance { font-size: 0.8125rem; color: var(--ink-3); overflow-wrap: anywhere; }
 .provenance q { font-style: italic; }
 
 @media (max-width: 860px) {

@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { draftEvidence, type Evidence } from "../../convex/lib/draftTypes";
+import { formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { SourceLink } from "../ui/SourceLink";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
 
@@ -82,7 +84,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
             {draft.meetingCadence && <span className="small muted">{draft.meetingCadence}</span>}
           </div>
           <span className="provenance">
-            From <a href={draft.sourceUrl} target="_blank" rel="noreferrer">{draft.sourceUrl.replace(/^https?:\/\//, "")}</a>
+            From <SourceLink url={draft.sourceUrl} />
             {draft.snippet && <> <q>{draft.snippet.slice(0, 160)}</q></>}
           </span>
         </div>
@@ -104,7 +106,7 @@ function DraftCard({ draft }: { draft: Doc<"drafts"> }) {
                   <tr key={i}>
                     <td><input className="input" style={{ height: 32 }} value={m.name} onChange={(e) => setMembers(members.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} aria-label="Member name" /></td>
                     <td className="muted">{m.role ?? ""}</td>
-                    <td className="muted">{m.appointed ?? "Unknown"}</td>
+                    <td className="muted" style={{ whiteSpace: "nowrap" }}>{formatRawDate(m.appointed ?? undefined)}</td>
                     <td><input className="input" style={{ height: 32, width: 140 }} value={m.termEnd ?? ""} placeholder="Unknown" onChange={(e) => setMembers(members.map((x, j) => (j === i ? { ...x, termEnd: e.target.value || null } : x)))} aria-label="Term end" /></td>
                     <td className="provenance"><q>{m.snippet}</q>{m.confidence !== "grounded" && <span className="pill pill-expiring" style={{ marginLeft: 6 }}>{m.confidence}</span>}</td>
                     <td><button className="btn btn-quiet btn-sm" onClick={() => setMembers(members.filter((_, j) => j !== i))}>Remove</button></td>

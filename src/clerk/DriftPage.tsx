@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { formatDateTime, formatRawDate } from "../lib/format";
 import { Empty, PageHead } from "../ui/PageHead";
+import { SourceLink } from "../ui/SourceLink";
 import { useCity } from "./Shell";
 import { errorText } from "../lib/errors";
 
@@ -46,7 +47,7 @@ export function DriftPage() {
                 <strong>{f.bodyName ?? "Unknown body"}</strong>
                 <span className="muted">{f.memberName ? `, ${f.memberName}` : ""}. {FIELD_LABEL[f.field] ?? f.field}.</span>
               </div>
-              <a className="small" href={f.sourceUrl} target="_blank" rel="noreferrer">Source page</a>
+              <SourceLink url={f.sourceUrl} />
             </div>
             <div className="diff">
               <div><div className="label">City page says</div>{f.published || <span className="muted">Nothing</span>}</div>

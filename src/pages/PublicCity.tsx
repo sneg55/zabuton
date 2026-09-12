@@ -6,6 +6,7 @@ import { formatDate, pluralize } from "../lib/format";
 import { Nameplate } from "../ui/Nameplate";
 import { Empty } from "../ui/PageHead";
 import { SiteFrame } from "../ui/Site";
+import { SourceLink } from "../ui/SourceLink";
 import { StatusPill } from "../ui/StatusPill";
 
 export function PublicCity() {
@@ -61,7 +62,7 @@ function PublicBody({ body, counts, slug }: { body: Doc<"bodies">; counts: Recor
         </div>
         <div className="row between">
           <span className="provenance">
-            Source: <a href={body.sourceUrl} target="_blank" rel="noreferrer">{new URL(body.sourceUrl).hostname}</a>
+            Source: <SourceLink url={body.sourceUrl} />
           </span>
           <Link to={`/c/${slug}/apply?body=${body._id}`} className="btn btn-secondary btn-sm">Apply to this body</Link>
         </div>

@@ -6,6 +6,7 @@ import { formatDate, formatRawDate } from "./lib/format";
 import { Empty, PageHead } from "./ui/PageHead";
 import { StatusPill } from "./ui/StatusPill";
 import { TermBar } from "./ui/TermBar";
+import { SourceLink } from "./ui/SourceLink";
 import { parseRawStart } from "./lib/format";
 
 export function ClerkBoard({ city }: { city: Doc<"cities"> }) {
@@ -73,7 +74,7 @@ function BodySeats({ bodyId }: { bodyId: Id<"bodies"> }) {
                 <td className="muted">{formatRawDate(term?.rawStart)}</td>
                 <td className="num">{formatDate(term?.endsAt, term?.rawEnd)}</td>
                 <td><StatusPill status={status} /></td>
-                <td>{term && <a className="small" href={term.sourceUrl} target="_blank" rel="noreferrer" title={term.snippet}>Source</a>}</td>
+                <td>{term && <SourceLink url={term.sourceUrl} short />}</td>
               </tr>
             ))}
           </tbody>
