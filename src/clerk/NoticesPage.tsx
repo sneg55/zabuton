@@ -22,7 +22,7 @@ export function NoticesPage() {
   const approve = useMutation(api.notices.approve);
   const discard = useMutation(api.notices.discard);
   const setEmail = useMutation(api.members.setEmail);
-  const { readOnly } = useDesk();
+  const { clerkOnly: readOnly } = useDesk();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   if (!notices || !openings) return <PageSkeleton rows={6} table />;

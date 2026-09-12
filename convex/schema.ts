@@ -75,6 +75,7 @@ export default defineSchema({
     inboxId: v.optional(v.string()),
     inboxAddress: v.optional(v.string()),
     expiringDays: v.optional(v.number()),
+    createdBy: v.optional(v.id("users")),
   })
     .index("by_domain", ["domain"])
     .index("by_slug", ["slug"]),

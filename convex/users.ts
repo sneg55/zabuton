@@ -1,5 +1,6 @@
 import { ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import type { Id } from "./_generated/dataModel";
 import { query, type MutationCtx, type QueryCtx } from "./_generated/server";
 
 export const me = query({
@@ -29,6 +30,14 @@ export async function requireDesk(ctx: QueryCtx | MutationCtx) {
   const user = await ctx.db.get(userId);
   if (!user || (user.role !== "clerk" && user.role !== "demo")) throw new ConvexError("Clerk role required");
   return user;
+}
+
+export async function requireCityWriter(ctx: QueryCtx | MutationCtx, cityId: Id<"cities">) {
+  const user = await requireDesk(ctx);
+  if (user.role === "clerk") return user;
+  const city = await ctx.db.get(cityId);
+  if (city && city.createdBy === user._id) return user;
+  throw new ConvexError(READ_ONLY_MESSAGE);
 }
 
 export async function requireClerk(ctx: QueryCtx | MutationCtx) {

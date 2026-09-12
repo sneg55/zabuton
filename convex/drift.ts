@@ -16,7 +16,7 @@ import { legistarRefFromUrl } from "./legistar";
 import { diffRoster, type TrackedMember } from "./lib/driftDiff";
 import { normalizeTermEnd } from "./lib/termDates";
 import { driftStatusValidator } from "./schema";
-import { requireClerk } from "./users";
+import { requireCityWriter } from "./users";
 import { workflow } from "./workflow";
 
 const publishedValidator = v.object({ name: v.string(), termEnd: v.union(v.string(), v.null()), snippet: v.string() });
@@ -197,7 +197,7 @@ export async function createDriftRun(ctx: MutationCtx, cityId: Id<"cities">, now
 export const runNow = mutation({
   args: { cityId: v.id("cities") },
   handler: async (ctx, { cityId }): Promise<Id<"crawlRuns">> => {
-    await requireClerk(ctx);
+    await requireCityWriter(ctx, cityId);
     const crawlRunId = await createDriftRun(ctx, cityId, Date.now());
     const workflowId = await workflow.start(
       ctx,
@@ -266,11 +266,11 @@ export async function resolveFlag(
 export const resolveMany = mutation({
   args: { flagIds: v.array(v.id("driftFlags")), action: v.union(v.literal("accept_published"), v.literal("keep_tracked")) },
   handler: async (ctx, { flagIds, action }) => {
-    await requireClerk(ctx);
     let resolved = 0;
     for (const flagId of flagIds) {
       const flag = await ctx.db.get(flagId);
       if (!flag || flag.status === "resolved") continue;
+      await requireCityWriter(ctx, flag.cityId);
       await resolveFlag(ctx, flagId, action);
       resolved += 1;
     }
@@ -281,7 +281,9 @@ export const resolveMany = mutation({
 export const resolve = mutation({
   args: { flagId: v.id("driftFlags"), action: v.union(v.literal("accept_published"), v.literal("keep_tracked")) },
   handler: async (ctx, { flagId, action }) => {
-    await requireClerk(ctx);
+    const flag = await ctx.db.get(flagId);
+    if (!flag) throw new ConvexError("That flag is gone");
+    await requireCityWriter(ctx, flag.cityId);
     return resolveFlag(ctx, flagId, action);
   },
 });

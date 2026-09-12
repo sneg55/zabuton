@@ -5,7 +5,7 @@ import { canonicalName, cleanRole, isGenericBodyName, mergeDrafts, type DraftInp
 import { isVacancyName } from "./lib/seatStatus";
 import { normalizeTermEnd } from "./lib/termDates";
 import { draftMemberValidator, draftStatusValidator } from "./schema";
-import { requireClerk } from "./users";
+import { requireCityWriter } from "./users";
 
 export const draftInputValidator = v.object({
   name: v.string(),
@@ -111,9 +111,9 @@ export const saveEdits = mutation({
     }),
   },
   handler: async (ctx, { draftId, edits }) => {
-    await requireClerk(ctx);
     const draft = await ctx.db.get(draftId);
     if (!draft) throw new ConvexError("That draft is gone");
+    await requireCityWriter(ctx, draft.cityId);
     if (draft.status !== "pending") throw new ConvexError("Only pending drafts can be edited");
     await ctx.db.patch(draftId, {
       ...(edits.name === undefined ? {} : { name: edits.name }),
@@ -128,10 +128,11 @@ export const saveEdits = mutation({
 export const dismissMany = mutation({
   args: { draftIds: v.array(v.id("drafts")) },
   handler: async (ctx, { draftIds }) => {
-    await requireClerk(ctx);
     for (const draftId of draftIds) {
       const draft = await ctx.db.get(draftId);
-      if (draft && draft.status === "pending") await ctx.db.patch(draftId, { status: "dismissed" });
+      if (!draft || draft.status !== "pending") continue;
+      await requireCityWriter(ctx, draft.cityId);
+      await ctx.db.patch(draftId, { status: "dismissed" });
     }
     return null;
   },
@@ -222,7 +223,9 @@ export async function confirmDraft(
 export const confirm = mutation({
   args: { draftId: v.id("drafts"), edits: v.optional(editsValidator) },
   handler: async (ctx, { draftId, edits }) => {
-    await requireClerk(ctx);
+    const draft = await ctx.db.get(draftId);
+    if (!draft) throw new ConvexError("That draft is gone");
+    await requireCityWriter(ctx, draft.cityId);
     return confirmDraft(ctx, draftId, edits);
   },
 });
@@ -230,9 +233,9 @@ export const confirm = mutation({
 export const dismiss = mutation({
   args: { draftId: v.id("drafts") },
   handler: async (ctx, { draftId }) => {
-    await requireClerk(ctx);
     const draft = await ctx.db.get(draftId);
     if (!draft) throw new ConvexError("That draft is gone");
+    await requireCityWriter(ctx, draft.cityId);
     if (draft.status === "confirmed") throw new ConvexError("That draft is already confirmed");
     await ctx.db.patch(draftId, { status: "dismissed" });
     return null;

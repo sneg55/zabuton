@@ -1,4 +1,5 @@
-import { useMutation, useQuery } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
@@ -28,11 +29,21 @@ export function Start() {
   const navigate = useNavigate();
   const url = params.get("url") ?? "";
   const start = useMutation(api.bootstrap.start);
+  const { signIn } = useAuthActions();
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const [runId, setRunId] = useState<Id<"crawlRuns"> | null>((params.get("run") as Id<"crawlRuns"> | null) ?? null);
   const [error, setError] = useState<string | null>(null);
+  const signedIn = useRef(false);
   const started = useRef(false);
   useEffect(() => {
-    if (!url || started.current || runId) return;
+    if (!url || runId || isLoading) return;
+    if (!isAuthenticated) {
+      if (signedIn.current) return;
+      signedIn.current = true;
+      void signIn("anonymous").catch((e: unknown) => setError(errorText(e)));
+      return;
+    }
+    if (started.current) return;
     started.current = true;
     start({ url })
       .then((r) => {
@@ -40,7 +51,7 @@ export function Start() {
         navigate(`/start?run=${r.crawlRunId}`, { replace: true });
       })
       .catch((e: unknown) => setError(errorText(e)));
-  }, [url, start, runId, navigate]);
+  }, [url, start, runId, navigate, signIn, isAuthenticated, isLoading]);
   const status = useQuery(api.bootstrap.status, runId ? { crawlRunId: runId } : "skip");
   return (
     <SiteFrame>
@@ -128,7 +139,7 @@ function RunView({ status }: { status: NonNullable<ReturnType<typeof useQuery<ty
             <p className="muted">{draftSummary(drafts, namedDrafts)} Each draft shows the sentence every name and date came from. Confirm them one by one from the clerk desk.</p>
           </div>
           <div className="row">
-            <Link to="/clerk/review" className="btn">Review drafts</Link>
+            <Link to={city ? `/clerk/review?city=${city._id}` : "/clerk/review"} className="btn">Review drafts</Link>
             {city && <Link to={`/c/${city.slug}`} className="btn btn-secondary">Public page</Link>}
           </div>
         </div>

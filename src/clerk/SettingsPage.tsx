@@ -11,7 +11,7 @@ export function SettingsPage() {
   const ensureInbox = useAction(api.mail.ensureInbox);
   const mailStatus = useAction(api.mail.status);
   const importCsv = useMutation(api.bootstrap.importCsv);
-  const { readOnly } = useDesk();
+  const { readOnly, clerkOnly } = useDesk();
   const [name, setName] = useState(city.name);
   const [days, setDays] = useState(String(city.expiringDays ?? 120));
   const [configured, setConfigured] = useState<boolean | null>(null);
@@ -51,7 +51,7 @@ export function SettingsPage() {
             <p className="muted">No inbox yet. One inbox per city; threads per applicant and per member.</p>
           )}
           {!city.inboxAddress && (
-            <button className="btn btn-secondary" disabled={configured === false || readOnly} title={readOnly ? READ_ONLY_HINT : undefined} onClick={() => run(ensureInbox({ cityId: city._id }), "Inbox created.")}>Create the city inbox</button>
+            <button className="btn btn-secondary" disabled={configured === false || clerkOnly} title={clerkOnly ? READ_ONLY_HINT : undefined} onClick={() => run(ensureInbox({ cityId: city._id }), "Inbox created.")}>Create the city inbox</button>
           )}
         </div>
         <form className="card card-pad stack" style={{ gridColumn: "1 / -1" }} onSubmit={(e) => { e.preventDefault(); run(importCsv({ cityId: city._id, csv }).then(() => setCsv("")), "Imported. Review the drafts."); }}>

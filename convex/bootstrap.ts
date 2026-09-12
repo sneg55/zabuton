@@ -1,4 +1,5 @@
 import { vResultValidator, vWorkflowId } from "@convex-dev/workflow";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -6,7 +7,7 @@ import { internalMutation, mutation, query, type MutationCtx } from "./_generate
 import { insertDrafts } from "./drafts";
 import { csvToDrafts } from "./lib/csv";
 import { BOOTSTRAP_RUN_CAP, CITY_RUN_CAP, IN_PROGRESS_STATUSES, normalizeCityUrl, overRunCap } from "./lib/discover";
-import { requireClerk } from "./users";
+import { requireCityWriter } from "./users";
 import { workflow } from "./workflow";
 
 export type StartedRun = { cityId: Id<"cities">; crawlRunId: Id<"crawlRuns">; websiteUrl: string; domain: string };
@@ -23,12 +24,15 @@ export async function ensureCity(ctx: MutationCtx, url: string): Promise<Doc<"ci
     .withIndex("by_slug", (q) => q.eq("slug", ref.slug))
     .unique();
   const slug = clash ? `${ref.slug}-${ref.domain.split(".").pop()}` : ref.slug;
+  const userId = await getAuthUserId(ctx);
+  const user = userId ? await ctx.db.get(userId) : null;
   const cityId = await ctx.db.insert("cities", {
     name: ref.name,
     domain: ref.domain,
     slug,
     websiteUrl: ref.websiteUrl,
     status: "draft",
+    ...(user?.role === "demo" ? { createdBy: user._id } : {}),
   });
   return (await ctx.db.get(cityId))!;
 }
@@ -200,7 +204,7 @@ export const latestRun = query({
 export const importCsv = mutation({
   args: { cityId: v.id("cities"), csv: v.string() },
   handler: async (ctx, { cityId, csv }) => {
-    await requireClerk(ctx);
+    await requireCityWriter(ctx, cityId);
     const city = await ctx.db.get(cityId);
     if (!city) throw new ConvexError("That city is gone");
     const drafts = csvToDrafts(csv, city.websiteUrl);

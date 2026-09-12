@@ -107,6 +107,17 @@ describe("demo desk", () => {
     await expect(demo.mutation(api.drafts.dismiss, { draftId })).rejects.toThrow(/read-only/);
     await expect(demo.mutation(api.drafts.saveEdits, { draftId, edits: { name: "x" } })).rejects.toThrow(/read-only/);
   });
+
+  it("can confirm drafts on a city it built itself", async () => {
+    const t = convexTest(schema, modules);
+    const demoId = await t.run(async (ctx) => ctx.db.insert("users", { name: "Demo clerk", role: "demo", isAnonymous: true }));
+    const cityId = await t.run(async (ctx) => ctx.db.insert("cities", { name: "Mine", domain: "mine.gov", slug: "mine", websiteUrl: "https://mine.gov", status: "draft", createdBy: demoId }));
+    const crawlRunId = await t.run(async (ctx) => ctx.db.insert("crawlRuns", { cityId, purpose: "bootstrap", source: "csv", status: "review", startedAt: 0, pageCount: 0, documentCount: 0, draftCount: 0, log: [] }));
+    const draftId = await t.run(async (ctx) => ctx.db.insert("drafts", { cityId, crawlRunId, name: "Library Board", meetingCadence: null, termLength: null, termLimit: null, seatCount: null, members: [], snippet: "", sourceUrl: "https://mine.gov/lib", status: "pending" }));
+    const demo = t.withIdentity({ subject: demoId });
+    const bodyId = await demo.mutation(api.drafts.confirm, { draftId });
+    expect(await t.run(async (ctx) => (await ctx.db.get(bodyId))?.name)).toBe("Library Board");
+  });
 });
 
 describe("drafts.confirm", () => {

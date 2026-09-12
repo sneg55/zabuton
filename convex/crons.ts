@@ -2,6 +2,7 @@ import { cronJobs } from "convex/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation } from "./_generated/server";
+import { wipeExpiredDemoCities } from "./cities";
 import { createDriftRun } from "./drift";
 import { IN_PROGRESS_STATUSES } from "./lib/discover";
 import { workflow } from "./workflow";
@@ -36,7 +37,14 @@ export const driftAllConfirmedCities = internalMutation({
   },
 });
 
+export const wipeDemoCities = internalMutation({
+  args: {},
+  handler: async (ctx): Promise<{ wiped: number }> => ({ wiped: await wipeExpiredDemoCities(ctx, Date.now()) }),
+});
+
 const crons = cronJobs();
+
+crons.daily("wipe demo cities", { hourUTC: 10, minuteUTC: 30 }, internal.crons.wipeDemoCities, {});
 
 crons.daily("drift check", { hourUTC: 11, minuteUTC: 0 }, internal.crons.driftAllConfirmedCities, {});
 

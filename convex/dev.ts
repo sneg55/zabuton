@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { internalAction, internalMutation, internalQuery, type MutationCtx } from "./_generated/server";
+import { wipeCityRows } from "./cities";
 import { confirmDraft } from "./drafts";
 import { inboxDisplayName } from "./mail";
 import { cleanRole, isGenericBodyName } from "./lib/draftTypes";
@@ -75,20 +76,7 @@ export const wipeCity = internalMutation({
   handler: async (ctx, { slug }) => {
     const city = await ctx.db.query("cities").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
     if (!city) throw new ConvexError("no city " + slug);
-    const bodies = await ctx.db.query("bodies").withIndex("by_city", (q) => q.eq("cityId", city._id)).collect();
-    for (const body of bodies) {
-      const seats = await ctx.db.query("seats").withIndex("by_body", (q) => q.eq("bodyId", body._id)).collect();
-      for (const seat of seats) {
-        for (const term of await ctx.db.query("terms").withIndex("by_seat", (q) => q.eq("seatId", seat._id)).collect()) await ctx.db.delete(term._id);
-        await ctx.db.delete(seat._id);
-      }
-      await ctx.db.delete(body._id);
-    }
-    for (const table of ["members", "drafts", "documents", "crawlRuns", "driftFlags", "notices", "applications", "threads"] as const) {
-      for (const row of await ctx.db.query(table).withIndex("by_city", (q) => q.eq("cityId", city._id)).collect()) await ctx.db.delete(row._id);
-    }
-    await ctx.db.delete(city._id);
-    return bodies.length;
+    return wipeCityRows(ctx, city);
   },
 });
 

@@ -64,7 +64,7 @@ function ApplicationDetail({ id, onClose }: { id: Id<"applications">; onClose: (
   const data = useQuery(api.applications.get, { applicationId: id });
   const draftReply = useAction(api.applications.draftReply);
   const setState = useMutation(api.applications.setState);
-  const { readOnly } = useDesk();
+  const { clerkOnly: readOnly } = useDesk();
   const [target, setTarget] = useState<State | null>(null);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);

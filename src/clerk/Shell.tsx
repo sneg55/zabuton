@@ -1,14 +1,14 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useOutletContext } from "react-router-dom";
+import { Link, NavLink, Outlet, useOutletContext, useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { SignIn } from "../SignIn";
 import { SiteFrame, Wordmark } from "../ui/Site";
 import { ShellSkeleton } from "../ui/Skeleton";
 
-type ShellContext = { city: Doc<"cities">; readOnly: boolean };
+type ShellContext = { city: Doc<"cities">; readOnly: boolean; clerkOnly: boolean };
 
 export const READ_ONLY_HINT = "The demo desk is read-only. Sign in as the clerk to change things.";
 
@@ -63,14 +63,22 @@ function ShellInner() {
   const { signOut } = useAuthActions();
   const me = useQuery(api.users.me);
   const cities = useQuery(api.roster.cities);
-  const [cityId, setCityId] = useState<string | null>(() => readStoredCity());
+  const [params] = useSearchParams();
+  const wantedCity = params.get("city");
+  const [cityId, setCityId] = useState<string | null>(() => wantedCity ?? readStoredCity());
+  useEffect(() => {
+    if (wantedCity) setCityId(wantedCity);
+  }, [wantedCity]);
   useEffect(() => {
     if (cityId) writeStoredCity(cityId);
   }, [cityId]);
   if (cities === undefined || me === undefined) return <ShellSkeleton />;
-  const ordered = [...cities].sort((a, b) => Number(b.status === "confirmed") - Number(a.status === "confirmed") || a.name.localeCompare(b.name));
+  const isClerk = me?.role === "clerk";
+  const visible = cities.filter((c) => isClerk || c.createdBy === undefined || c.createdBy === me?._id);
+  const ordered = [...visible].sort((a, b) => Number(b.status === "confirmed") - Number(a.status === "confirmed") || a.name.localeCompare(b.name));
   const city = ordered.find((c) => c._id === cityId) ?? ordered.find((c) => c.slug === DEFAULT_CITY_SLUG) ?? ordered[0];
-  const readOnly = me?.role === "demo";
+  const readOnly = !isClerk && city?.createdBy !== me?._id;
+  const clerkOnly = !isClerk;
   if (me && me.role !== "clerk" && me.role !== "demo") {
     return (
       <SiteFrame>
@@ -102,9 +110,9 @@ function ShellInner() {
       <aside className="rail">
         <Wordmark />
         <div className="rail-city">
-          {cities.length > 1 ? (
+          {ordered.length > 1 ? (
             <select className="select" value={city._id} onChange={(e) => setCityId(e.target.value)}>
-              {ordered.map((c) => <option key={c._id} value={c._id}>{c.name}{c.status === "confirmed" ? "" : " (in setup)"}</option>)}
+              {ordered.map((c) => <option key={c._id} value={c._id}>{c.name}{c.status === "confirmed" ? "" : c.createdBy === me?._id ? " (yours, in setup)" : " (in setup)"}</option>)}
             </select>
           ) : (
             <strong>{city.name}</strong>
@@ -129,11 +137,16 @@ function ShellInner() {
       <main>
         {readOnly && (
           <div className="demo-banner">
-            <span>Demo desk: everything is visible, nothing saves. Sign in as the clerk to change things.</span>
+            <span>Demo desk: everything is visible, nothing saves. Sign in as the clerk to change things, or build your own city from the front page and review it here.</span>
             <button className="btn btn-secondary btn-sm" onClick={() => void signOut()}>Sign in as the clerk</button>
           </div>
         )}
-        <Outlet context={{ city, readOnly } satisfies ShellContext} />
+        {!readOnly && clerkOnly && (
+          <div className="demo-banner">
+            <span>Your city: review, confirm and check drift here. Mail and applications stay with the clerk. It is cleared after a day.</span>
+          </div>
+        )}
+        <Outlet context={{ city, readOnly, clerkOnly } satisfies ShellContext} />
       </main>
     </div>
   );
